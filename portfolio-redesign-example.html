@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tuur Bellers — Gameplay & AI Programmer (Redesign Demo)</title>
+  <style>
+/* ============================================================
+   VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg:      #0b0c10;
+  --panel:   #0f1116;
+  --ring:    #1f2937;
+  --fg:      #e5e7eb;
+  --muted:   #9aa3af;
+  --accent:  #7dd3fc;
+  --accent2: #a78bfa;
+  --rad:     14px;
+  --shadow:  0 8px 32px rgba(0,0,0,.45);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+section { padding: 80px 0; }
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(11,12,16,.85);
+  backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--ring);
+}
+.navrow {
+  display: flex; align-items: center; flex-wrap: wrap;
+  min-height: 60px; gap: 0;
+}
+.brand {
+  font-weight: 800; font-size: 17px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding: 0 4px;
+}
+.nav { margin-left: auto; display: flex; gap: 4px; }
+.nav a {
+  color: var(--muted); font-weight: 600; font-size: 14px;
+  padding: 7px 13px; border-radius: 8px;
+  transition: color .15s, background .15s;
+}
+.nav a:hover { color: var(--fg); background: rgba(255,255,255,.05); }
+.hamburger {
+  display: none;
+  background: none; border: 1px solid var(--ring);
+  color: var(--fg); width: 36px; height: 36px;
+  border-radius: 8px; cursor: pointer; font-size: 18px;
+  margin-left: auto; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  position: relative; padding: 100px 0 88px; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -120px; right: -80px;
+  width: 750px; height: 750px;
+  background: radial-gradient(circle at 60% 40%, rgba(125,211,252,.07) 0%, transparent 65%);
+  pointer-events: none;
+  animation: blob 12s ease-in-out infinite;
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: -120px; left: 20%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle at 40% 60%, rgba(167,139,250,.05) 0%, transparent 65%);
+  pointer-events: none;
+  animation: blob 15s ease-in-out infinite reverse;
+}
+@keyframes blob { 0%,100% { transform: scale(1) translate(0,0); } 50% { transform: scale(1.06) translate(20px,-15px); } }
+
+.hero-eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 900; line-height: 1.04; letter-spacing: -2.5px; margin-bottom: 22px;
+}
+.grad {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-sub {
+  max-width: 58ch; font-size: 18px; color: var(--muted);
+  margin-bottom: 40px; line-height: 1.65;
+}
+.hero-sub strong { color: var(--fg); font-weight: 600; }
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-block; padding: 13px 26px; border-radius: 12px;
+  font-weight: 700; font-size: 15px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #0b0c10; border: none; cursor: pointer;
+  transition: opacity .15s, transform .15s;
+}
+.btn-primary:hover { opacity: .88; transform: translateY(-2px); }
+.btn-outline {
+  display: inline-block; padding: 13px 26px; border-radius: 12px;
+  font-weight: 700; font-size: 15px;
+  background: transparent; color: var(--fg);
+  border: 1px solid var(--ring); cursor: pointer;
+  transition: border-color .15s, color .15s, transform .15s;
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+/* ============================================================
+   SKILLS
+   ============================================================ */
+.section-eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.section-title { font-size: 34px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 40px; }
+.skills-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+}
+.skill-card {
+  background: var(--panel); border: 1px solid var(--ring);
+  border-radius: var(--rad); padding: 24px 22px;
+  transition: border-color .2s, transform .2s;
+}
+.skill-card:hover { border-color: rgba(125,211,252,.3); transform: translateY(-2px); }
+.skill-icon { font-size: 26px; margin-bottom: 14px; }
+.skill-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.skill-card p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+/* ============================================================
+   PROJECTS
+   ============================================================ */
+.projects-section { background: rgba(15,17,22,.6); }
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+.filter-btn {
+  padding: 8px 18px; border-radius: 999px;
+  border: 1px solid var(--ring); background: transparent;
+  color: var(--muted); font-weight: 700; font-size: 13px;
+  cursor: pointer; transition: all .15s;
+}
+.filter-btn:hover { color: var(--fg); border-color: rgba(125,211,252,.3); }
+.filter-btn.active {
+  color: var(--accent); border-color: var(--accent);
+  background: rgba(125,211,252,.08);
+}
+.status-heading {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--muted); margin: 36px 0 16px;
+}
+.status-heading:first-child { margin-top: 0; }
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px;
+}
+.proj-card {
+  background: var(--panel); border: 1px solid var(--ring);
+  border-radius: var(--rad); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.proj-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(125,211,252,.35);
+  box-shadow: 0 20px 48px rgba(0,0,0,.45), 0 0 0 1px rgba(125,211,252,.08);
+}
+.card-media {
+  aspect-ratio: 16/9; overflow: hidden;
+  background: #0a0b0e; position: relative;
+}
+.card-media img, .card-media video {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .35s;
+}
+.proj-card:hover .card-media img { transform: scale(1.04); }
+.ongoing-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(167,139,250,.15); border: 1px solid rgba(167,139,250,.45);
+  color: #a78bfa; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px; letter-spacing: .8px; text-transform: uppercase;
+}
+.card-body {
+  padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px;
+}
+.card-title { font-size: 16px; font-weight: 800; line-height: 1.25; }
+.card-desc { font-size: 13px; color: var(--muted); line-height: 1.55; flex: 1; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 999px; border: 1px solid; letter-spacing: .2px;
+}
+.card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.card-btn {
+  padding: 8px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 700;
+  border: 1px solid var(--ring); color: var(--fg); background: transparent;
+  transition: border-color .15s, color .15s; cursor: pointer; display: inline-block;
+}
+.card-btn:hover { border-color: var(--accent); color: var(--accent); }
+.card-btn.filled {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #0b0c10; border: none;
+}
+.card-btn.filled:hover { opacity: .85; color: #0b0c10; }
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;
+}
+.about-text p { color: var(--muted); line-height: 1.75; margin-bottom: 16px; }
+.about-text p strong { color: var(--fg); font-weight: 600; }
+.highlight-list { display: flex; flex-direction: column; gap: 12px; }
+.highlight-item {
+  background: var(--panel); border: 1px solid var(--ring);
+  border-radius: var(--rad); padding: 16px 20px;
+  display: flex; gap: 14px; align-items: flex-start;
+  transition: border-color .2s;
+}
+.highlight-item:hover { border-color: rgba(125,211,252,.25); }
+.hi-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.hi-text h4 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.hi-text p { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact-section { background: rgba(15,17,22,.6); }
+.contact-lead { color: var(--muted); max-width: 55ch; margin-bottom: 40px; line-height: 1.65; }
+.contact-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;
+}
+.contact-card {
+  background: var(--panel); border: 1px solid var(--ring);
+  border-radius: var(--rad); padding: 22px 24px;
+  display: flex; align-items: center; gap: 16px;
+  transition: border-color .2s, transform .2s;
+}
+.contact-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.contact-icon { font-size: 26px; flex-shrink: 0; }
+.contact-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+}
+.contact-value { font-size: 14px; font-weight: 600; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer { border-top: 1px solid var(--ring); padding: 24px 0; }
+.foot-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+footer small { color: var(--muted); font-size: 13px; }
+.foot-links { display: flex; gap: 20px; }
+.foot-links a { color: var(--muted); font-size: 13px; transition: color .15s; }
+.foot-links a:hover { color: var(--fg); }
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+.reveal {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: .1s; }
+.reveal-d2 { transition-delay: .2s; }
+.reveal-d3 { transition-delay: .3s; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 760px) {
+  .hamburger { display: flex; }
+  .nav {
+    display: none; flex-direction: column; gap: 0;
+    flex-basis: 100%; order: 3;
+    border-top: 1px solid var(--ring);
+    padding: 8px 0 12px;
+  }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 4px; border-bottom: 1px solid rgba(31,41,55,.6); font-size: 15px; }
+  .nav a:last-child { border-bottom: none; }
+  .about-grid { grid-template-columns: 1fr; gap: 28px; }
+  section { padding: 56px 0; }
+  .hero { padding: 64px 0 56px; }
+}
+@media (max-width: 480px) {
+  .hero h1 { letter-spacing: -1px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+}
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAV
+     ============================================================ -->
+<header class="topbar">
+  <div class="container navrow">
+    <a class="brand" href="#home">Tuur Bellers</a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation">☰</button>
+    <nav class="nav" id="nav">
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="resume.html" target="_blank">Résumé</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero" id="home">
+  <div class="container">
+    <p class="hero-eyebrow">Gameplay &amp; AI Programmer</p>
+    <h1>Hi, I'm <span class="grad">Tuur</span>.</h1>
+    <p class="hero-sub">
+      Game developer specializing in <strong>gameplay systems</strong> and <strong>AI behaviors</strong>
+      at Howest DAE. I build the logic that makes virtual worlds feel alive — from utility-based agents
+      to behavior trees and reactive environments.
+    </p>
+    <div class="cta-row">
+      <a class="btn-primary" href="#projects">View Projects</a>
+      <a class="btn-outline" href="https://github.com/TuurBellersDAE" target="_blank">GitHub</a>
+      <a class="btn-outline" href="mailto:tuur.bellers@gmail.com">Email Me</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SKILLS
+     ============================================================ -->
+<section id="skills">
+  <div class="container">
+    <p class="section-eyebrow">Expertise</p>
+    <h2 class="section-title">What I Do</h2>
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <div class="skill-icon">⌨️</div>
+        <h3>Languages</h3>
+        <p>C++ · C#</p>
+      </div>
+      <div class="skill-card reveal reveal-d1">
+        <div class="skill-icon">🎮</div>
+        <h3>Engines</h3>
+        <p>Unity · Unreal Engine 5</p>
+      </div>
+      <div class="skill-card reveal reveal-d2">
+        <div class="skill-icon">🤖</div>
+        <h3>AI Systems</h3>
+        <p>FSM · Utility AI · Behavior Trees</p>
+      </div>
+      <div class="skill-card reveal reveal-d3">
+        <div class="skill-icon">🛠️</div>
+        <h3>Tools</h3>
+        <p>Git · Perforce · VS · Blender · Photoshop</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PROJECTS — cards rendered by JS from the PROJECTS array below
+     ============================================================ -->
+<section id="projects" class="projects-section">
+  <div class="container">
+    <p class="section-eyebrow">Work</p>
+    <h2 class="section-title">Projects</h2>
+    <div class="filter-bar" id="filter-bar"></div>
+    <div id="project-grid"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ABOUT
+     ============================================================ -->
+<section id="about">
+  <div class="container">
+    <p class="section-eyebrow">Background</p>
+    <h2 class="section-title">About Me</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>
+          I'm a game developer focused on <strong>gameplay programming</strong> and <strong>AI for games</strong>,
+          currently completing my graduation work at Howest DAE.
+        </p>
+        <p>
+          I enjoy prototyping mechanics fast, iterating with teams, and finding the sweet spot between
+          technical elegance and playable feel. My work ranges from utility-driven autonomous agents
+          to reactive environmental systems in team brawlers.
+        </p>
+        <p>
+          Outside of coursework I'm researching how <strong>LLMs can guide Behavior Tree evolution</strong>
+          at runtime in UE5 — automating what normally takes a designer hours of manual tuning.
+        </p>
+      </div>
+      <div class="highlight-list reveal reveal-d1">
+        <div class="highlight-item">
+          <span class="hi-icon">💪</span>
+          <div class="hi-text">
+            <h4>Strong C++ foundation</h4>
+            <p>Comfortable with C#. Prefer low-level control for AI and systems work.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="hi-icon">🎮</span>
+          <div class="hi-text">
+            <h4>Multi-engine experience</h4>
+            <p>Unity and Unreal Engine 5 — both solo and team projects.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="hi-icon">🤝</span>
+          <div class="hi-text">
+            <h4>Collaborative workflow</h4>
+            <p>Git, Perforce, feedback-driven iteration, cross-discipline teams.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="hi-icon">🔬</span>
+          <div class="hi-text">
+            <h4>Research-driven</h4>
+            <p>Graduation project: AI-driven procedural behavior generation in UE5.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CONTACT
+     ============================================================ -->
+<section id="contact" class="contact-section">
+  <div class="container">
+    <p class="section-eyebrow">Get in Touch</p>
+    <h2 class="section-title">Contact</h2>
+    <p class="contact-lead">
+      Open to internships, game jam collaborations, and entry-level roles.
+      Drop me a message — I read everything.
+    </p>
+    <div class="contact-grid">
+      <a class="contact-card reveal" href="mailto:tuur.bellers@gmail.com">
+        <span class="contact-icon">✉️</span>
+        <div>
+          <p class="contact-label">Email</p>
+          <p class="contact-value">tuur.bellers@gmail.com</p>
+        </div>
+      </a>
+      <a class="contact-card reveal reveal-d1" href="https://github.com/TuurBellersDAE" target="_blank">
+        <span class="contact-icon">🐙</span>
+        <div>
+          <p class="contact-label">GitHub</p>
+          <p class="contact-value">TuurBellersDAE</p>
+        </div>
+      </a>
+      <a class="contact-card reveal reveal-d2" href="https://www.linkedin.com/in/tuur-bellers" target="_blank">
+        <span class="contact-icon">💼</span>
+        <div>
+          <p class="contact-label">LinkedIn</p>
+          <p class="contact-value">tuur-bellers</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="container">
+    <div class="foot-inner">
+      <small>&copy; <span id="y"></span> Tuur Bellers</small>
+      <div class="foot-links">
+        <a href="resume.html">Résumé</a>
+        <a href="https://github.com/TuurBellersDAE" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/in/tuur-bellers" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   PROJECT DATA
+   ─────────────────────────────────────────────────────────────
+   To add a new project, just add an object to this array.
+
+   Fields:
+     id          – unique slug (string)
+     status      – "completed" | "ongoing"
+     title       – display title
+     tags        – array of strings, used for filtering
+     thumb       – path to thumbnail image (optional)
+     video       – path to short preview .mp4 (optional)
+                   ↑ autoplays silently on card hover
+     description – one-sentence summary shown on the card
+     detailUrl   – link to full project page (optional)
+     githubUrl   – link to GitHub repo (optional)
+     playUrl     – link to itch.io / live demo (optional)
+   ============================================================ */
+const PROJECTS = [
+  {
+    id: "utility-ai",
+    status: "completed",
+    title: "Utility AI — Autonomous Agent",
+    tags: ["C++", "AI", "Systems", "Solo"],
+    thumb: "assets/utility-thumb.png",
+    video: "assets/utility-demo.mp4",
+    description: "Hybrid FSM + Utility AI for a zombie survival game. Context-based decisions for exploration, items, fleeing, and combat.",
+    detailUrl: "projects/utility-ai.html",
+    githubUrl: "https://github.com/TuurBellersDAE/Zombie-Game-AI"
+  },
+  {
+    id: "shrimpact",
+    status: "completed",
+    title: "Shrimpact",
+    tags: ["Unity", "C#", "Gameplay", "Team"],
+    thumb: "assets/shrimpact-thumb.png",
+    video: "assets/shrimpact-demo.mp4",
+    description: "Team arena brawler. I built reactive environmental mechanics and a lightweight fish-school AI.",
+    detailUrl: "projects/shrimpact.html",
+    playUrl: "https://jelleadyns.itch.io/shrimpact"
+  },
+  {
+    id: "towerdefense",
+    status: "completed",
+    title: "Tower Defense",
+    tags: ["Unity", "C#", "Gameplay", "Solo", "Design"],
+    thumb: "assets/towerdefense-thumb.png",
+    video: "assets/towerdefense-demo.mp4",
+    description: "Solo tower defense game with resource collection and hireable NPCs. Focused on satisfying game loop and tunable difficulty.",
+    detailUrl: "projects/towerdefense.html",
+    githubUrl: "https://github.com/TuurBellersDAE/GEP_UnityProject"
+  },
+  {
+    id: "llm-bt-evolution",
+    status: "ongoing",
+    title: "LLM-Guided Behavior Tree Evolution",
+    tags: ["Unreal", "C++", "AI", "Research"],
+    description: "Research: using LLMs to dynamically generate and evolve Behavior Trees at runtime in UE5. Exports successful structures as reusable BT assets independent of the LLM.",
+    detailUrl: "projects/llm-bt-evolution.html"
+  }
+];
+
+/* ============================================================
+   TAG COLORS — add entries here to color-code new tags
+   ============================================================ */
+const TAG_COLORS = {
+  "C++":      "#7dd3fc",
+  "C#":       "#38bdf8",
+  "Unity":    "#4ade80",
+  "Unreal":   "#fb923c",
+  "AI":       "#a78bfa",
+  "Research": "#a78bfa",
+  "Systems":  "#facc15",
+  "Gameplay": "#38bdf8",
+  "Team":     "#818cf8",
+  "Solo":     "#94a3b8",
+  "Design":   "#f472b6"
+};
+
+function tagStyle(t) {
+  const c = TAG_COLORS[t] || "#9aa3af";
+  return `style="color:${c}; background:${c}18; border-color:${c}44"`;
+}
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+const FILTER_LABELS = ["All", "C++", "Unity", "Unreal", "Research"];
+let activeFilter = "All";
+
+function renderFilters() {
+  const bar = document.getElementById("filter-bar");
+  bar.innerHTML = FILTER_LABELS.map(f =>
+    `<button class="filter-btn${f === activeFilter ? " active" : ""}" data-filter="${f}">${f}</button>`
+  ).join("");
+  bar.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeFilter = btn.dataset.filter;
+      renderFilters();
+      renderProjects();
+    });
+  });
+}
+
+/* ============================================================
+   PROJECT CARDS
+   ============================================================ */
+function cardHTML(p) {
+  const media = p.thumb
+    ? `<img src="${p.thumb}" alt="${p.title}" loading="lazy">`
+    : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">No preview</div>`;
+
+  const badge     = p.status === "ongoing" ? `<span class="ongoing-badge">In Progress</span>` : "";
+  const videoAttr = p.video    ? ` data-video="${p.video}"` : "";
+  const tagsHtml  = p.tags.map(t => `<span class="tag" ${tagStyle(t)}>${t}</span>`).join("");
+  const detailBtn = p.detailUrl ? `<a class="card-btn filled" href="${p.detailUrl}">See more</a>` : "";
+  const githubBtn = p.githubUrl ? `<a class="card-btn" href="${p.githubUrl}" target="_blank">Code</a>` : "";
+  const playBtn   = p.playUrl   ? `<a class="card-btn" href="${p.playUrl}" target="_blank">Play</a>` : "";
+
+  return `
+    <article class="proj-card reveal">
+      <div class="card-media"${videoAttr}>${media}${badge}</div>
+      <div class="card-body">
+        <h3 class="card-title">${p.title}</h3>
+        <p class="card-desc">${p.description}</p>
+        <div class="tags">${tagsHtml}</div>
+        <div class="card-actions">${detailBtn}${githubBtn}${playBtn}</div>
+      </div>
+    </article>`;
+}
+
+function renderProjects() {
+  const match = activeFilter === "All"
+    ? PROJECTS
+    : PROJECTS.filter(p =>
+        p.tags.some(t => t.toLowerCase() === activeFilter.toLowerCase())
+      );
+
+  const completed = match.filter(p => p.status === "completed");
+  const ongoing   = match.filter(p => p.status === "ongoing");
+
+  let html = "";
+  if (completed.length) {
+    html += `<p class="status-heading">Completed</p><div class="cards-grid">${completed.map(cardHTML).join("")}</div>`;
+  }
+  if (ongoing.length) {
+    html += `<p class="status-heading" style="margin-top:40px">Ongoing</p><div class="cards-grid">${ongoing.map(cardHTML).join("")}</div>`;
+  }
+  if (!match.length) {
+    html = `<p style="color:var(--muted);padding:40px 0">No projects with that filter yet.</p>`;
+  }
+
+  document.getElementById("project-grid").innerHTML = html;
+  wireVideoHover();
+  attachReveal();
+}
+
+/* ============================================================
+   VIDEO-ON-HOVER
+   ============================================================ */
+function wireVideoHover() {
+  document.querySelectorAll(".card-media[data-video]").forEach(el => {
+    if (el._wired) return;
+    el._wired = true;
+    const img = el.querySelector("img");
+    const src = el.dataset.video;
+    if (!img || !src) return;
+    let vid = null;
+    el.style.position = "relative";
+
+    function makeVid() {
+      const v = document.createElement("video");
+      v.src = src; v.muted = true; v.loop = true; v.playsInline = true;
+      v.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;";
+      return v;
+    }
+
+    el.addEventListener("mouseenter", () => {
+      img.style.transition = "opacity .2s";
+      img.style.opacity = "0";
+      vid = vid || makeVid();
+      if (!el.contains(vid)) el.appendChild(vid);
+      vid.play().catch(() => {});
+    });
+    el.addEventListener("mouseleave", () => {
+      img.style.opacity = "1";
+      if (vid) { vid.pause(); vid.currentTime = 0; }
+    });
+  });
+}
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add("visible");
+      revealObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+function attachReveal() {
+  document.querySelectorAll(".reveal:not(.visible)").forEach(el => revealObs.observe(el));
+}
+
+/* ============================================================
+   HAMBURGER MENU
+   ============================================================ */
+const hamburger = document.getElementById("hamburger");
+const nav       = document.getElementById("nav");
+
+hamburger.addEventListener("click", () => {
+  const open = nav.classList.toggle("open");
+  hamburger.textContent = open ? "✕" : "☰";
+  hamburger.setAttribute("aria-expanded", String(open));
+});
+
+nav.querySelectorAll("a").forEach(a => {
+  a.addEventListener("click", () => {
+    nav.classList.remove("open");
+    hamburger.textContent = "☰";
+  });
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.getElementById("y").textContent = new Date().getFullYear();
+renderFilters();
+renderProjects();
+attachReveal(); // non-project .reveal elements (skills, about, contact)
+</script>
+</body>
+</html>
