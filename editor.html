@@ -3,478 +3,746 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Portfolio Editor</title>
+<title>Portfolio CMS</title>
 <style>
 /* ================================================================
-   DESIGN TOKENS
+   TOKENS
    ================================================================ */
 :root {
-  --bg: #111218;
-  --surface: #1a1b24;
-  --card: #22232e;
-  --border: #2e3040;
+  --bg: #0e0f15;
+  --surface: #151620;
+  --card: #1c1d2a;
+  --card-hover: #222336;
+  --border: #2a2c3e;
+  --border-light: #363850;
   --fg: #e0e2ea;
-  --muted: #7a7f96;
+  --muted: #6b7094;
   --primary: #2dd4bf;
-  --primary-dim: rgba(45,212,191,.12);
+  --primary-dim: rgba(45,212,191,.1);
+  --primary-mid: rgba(45,212,191,.25);
   --accent: #a78bfa;
+  --accent-dim: rgba(167,139,250,.1);
   --danger: #f87171;
-  --danger-dim: rgba(248,113,113,.12);
-  --radius: 8px;
+  --danger-dim: rgba(248,113,113,.08);
+  --success: #34d399;
+  --warn: #fbbf24;
+  --radius: 6px;
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+  --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  --shadow: 0 4px 24px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 48px rgba(0,0,0,.6);
 }
 
 /* ================================================================
-   RESET & BASE
+   RESET
    ================================================================ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
-body {
-  background: var(--bg); color: var(--fg); font-family: var(--font);
-  font-size: 14px; line-height: 1.5; overflow: hidden;
-}
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-input, textarea, select, button { font-family: inherit; font-size: inherit; }
-a { color: var(--primary); text-decoration: none; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13px;line-height:1.5;overflow:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-light)}
+input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--primary);text-decoration:none}
+::selection{background:var(--primary-mid);color:var(--fg)}
 
 /* ================================================================
-   LAYOUT
+   APP LAYOUT
    ================================================================ */
-#app { display: flex; flex-direction: column; height: 100vh; }
+#app{display:flex;flex-direction:column;height:100vh}
 
-/* Top bar */
-.toolbar {
-  display: flex; align-items: center; gap: 16px;
-  padding: 0 20px; height: 56px; min-height: 56px;
-  background: var(--surface); border-bottom: 1px solid var(--border);
+/* ---- Toolbar ---- */
+.toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:0 14px;height:48px;min-height:48px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  z-index:100;
 }
-.toolbar-title {
-  font-size: 15px; font-weight: 700; color: var(--primary);
-  font-family: var(--mono); letter-spacing: .04em;
+.toolbar-logo{
+  font-family:var(--mono);font-size:14px;font-weight:700;
+  color:var(--primary);margin-right:6px;letter-spacing:.06em;
 }
-.toolbar-title span { color: var(--muted); font-weight: 400; }
-.toolbar-spacer { flex: 1; }
+.toolbar-sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+.toolbar-group{display:flex;align-items:center;gap:2px}
+.toolbar-spacer{flex:1}
+.save-status{
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  display:flex;align-items:center;gap:5px;margin-right:8px;
+}
+.save-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
+.save-dot.dirty{background:var(--warn);animation:pulse 1.5s infinite}
+@keyframes pulse{50%{opacity:.4}}
 
-/* Body = sidebar + main */
-.body { display: flex; flex: 1; overflow: hidden; }
+/* Toolbar buttons */
+.tb{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  height:32px;min-width:32px;padding:0 8px;
+  background:transparent;border:1px solid transparent;border-radius:var(--radius);
+  color:var(--muted);cursor:pointer;transition:all .1s;font-size:12px;font-weight:500;
+  white-space:nowrap;
+}
+.tb:hover{color:var(--fg);background:var(--card);border-color:var(--border)}
+.tb:active{transform:scale(.96)}
+.tb.active{color:var(--primary);background:var(--primary-dim);border-color:rgba(45,212,191,.2)}
+.tb svg{width:15px;height:15px;flex-shrink:0}
+.tb-label{display:inline}
+.tb-primary{background:var(--primary);border-color:var(--primary);color:var(--bg);font-weight:700}
+.tb-primary:hover{background:#3ee8d1;border-color:#3ee8d1}
+.tb-accent{color:var(--accent)}
+.tb-accent:hover{background:var(--accent-dim);border-color:rgba(167,139,250,.3)}
+.tb[disabled]{opacity:.3;pointer-events:none}
 
-/* Sidebar */
-.sidebar {
-  width: 200px; min-width: 200px;
-  background: var(--surface); border-right: 1px solid var(--border);
-  padding: 12px 0; display: flex; flex-direction: column;
-}
-.sidebar-section {
-  font-size: 10px; font-weight: 700; letter-spacing: .12em;
-  color: var(--muted); padding: 16px 20px 6px; text-transform: uppercase;
-}
-.sidebar a {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 20px; color: var(--muted); font-weight: 500;
-  border-left: 2px solid transparent; transition: all .12s;
-  cursor: pointer;
-}
-.sidebar a:hover { color: var(--fg); background: var(--primary-dim); }
-.sidebar a.active {
-  color: var(--primary); border-left-color: var(--primary);
-  background: var(--primary-dim);
-}
-.sidebar a svg { width: 16px; height: 16px; flex-shrink: 0; }
+@media(max-width:800px){.tb-label{display:none}.toolbar-sep:nth-child(n+4){display:none}}
 
-/* Main */
-.main {
-  flex: 1; overflow-y: auto; padding: 28px 32px 60px;
+/* ---- Body: sidebar + split ---- */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* ---- Sidebar ---- */
+.sidebar{
+  width:52px;min-width:52px;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:10px 0;gap:2px;
+  transition:width .2s;
 }
+.sidebar.expanded{width:180px;min-width:180px;align-items:stretch}
+.sidebar-toggle{
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;color:var(--muted);cursor:pointer;border-radius:var(--radius);
+  margin-bottom:8px;transition:all .12s;
+}
+.sidebar-toggle:hover{color:var(--fg);background:var(--card)}
+.sidebar.expanded .sidebar-toggle{align-self:flex-end;margin-right:8px}
+.sb-link{
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:var(--radius);
+  color:var(--muted);cursor:pointer;border:none;background:none;
+  transition:all .12s;position:relative;
+}
+.sb-link:hover{color:var(--fg);background:var(--card)}
+.sb-link.active{color:var(--primary);background:var(--primary-dim)}
+.sb-link svg{width:18px;height:18px;flex-shrink:0}
+.sb-link span{display:none;font-size:13px;font-weight:500;margin-left:10px}
+.sidebar.expanded .sb-link{width:auto;justify-content:flex-start;padding:0 14px;height:36px}
+.sidebar.expanded .sb-link span{display:inline}
+.sb-link[data-tooltip]::after{
+  content:attr(data-tooltip);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
+  background:var(--card);border:1px solid var(--border);border-radius:4px;
+  padding:4px 10px;font-size:11px;color:var(--fg);white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .15s;z-index:200;
+}
+.sb-link:hover[data-tooltip]::after{opacity:1}
+.sidebar.expanded .sb-link::after{display:none}
+.sb-sep{width:24px;height:1px;background:var(--border);margin:6px 0}
+.sidebar.expanded .sb-sep{width:calc(100% - 28px);margin:6px 14px}
+
+/* ---- Split pane ---- */
+.split{display:flex;flex:1;overflow:hidden}
+.split-editor{flex:1;min-width:280px;overflow-y:auto;padding:24px 28px 80px}
+.split-handle{
+  width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;
+  transition:background .12s;position:relative;
+}
+.split-handle:hover,.split-handle.dragging{background:var(--primary)}
+.split-handle::after{
+  content:'';position:absolute;inset:-0 -4px;
+}
+.split-preview{
+  width:42%;min-width:200px;background:var(--bg);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.split-preview.hidden{display:none}
+.preview-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:0 10px;height:34px;min-height:34px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  border-left:1px solid var(--border);font-size:11px;
+}
+.preview-bar select{
+  background:var(--card);border:1px solid var(--border);border-radius:4px;
+  color:var(--fg);padding:3px 8px;font-size:11px;font-family:var(--mono);
+  cursor:pointer;outline:none;
+}
+.preview-bar select:focus{border-color:var(--primary)}
+.preview-bar .muted{color:var(--muted);font-family:var(--mono)}
+.preview-url{
+  flex:1;font-family:var(--mono);color:var(--muted);font-size:10px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;
+}
+#preview-frame{flex:1;border:none;background:#0b0c10;width:100%}
 
 /* ================================================================
-   COMMON COMPONENTS
+   COMPONENTS
    ================================================================ */
 
 /* Section header */
-.sec-head {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 20px;
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sec-head h2{font-size:16px;font-weight:700}
+.sec-head .badge{
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  background:var(--card);border:1px solid var(--border);
+  padding:2px 10px;border-radius:99px;
 }
-.sec-head h2 { font-size: 18px; font-weight: 700; }
-.sec-head .count {
-  font-family: var(--mono); font-size: 12px; color: var(--muted);
-  background: var(--card); padding: 2px 10px; border-radius: 99px;
-}
+.sec-head .spacer{flex:1}
 
 /* Buttons */
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--border);
-  background: var(--card); color: var(--fg); font-weight: 600;
-  cursor: pointer; transition: all .12s; font-size: 13px;
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--card);color:var(--fg);font-weight:600;font-size:12px;
+  cursor:pointer;transition:all .1s;white-space:nowrap;
 }
-.btn:hover { border-color: var(--primary); color: var(--primary); }
-.btn svg { width: 14px; height: 14px; }
-.btn-primary {
-  background: var(--primary); border-color: var(--primary);
-  color: var(--bg); font-weight: 700;
-}
-.btn-primary:hover { background: #3ee8d1; }
-.btn-danger { color: var(--danger); }
-.btn-danger:hover { background: var(--danger-dim); border-color: var(--danger); }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn:active{transform:scale(.97)}
+.btn svg{width:13px;height:13px}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:var(--bg);font-weight:700}
+.btn-primary:hover{background:#3ee8d1}
+.btn-danger{color:var(--danger)}
+.btn-danger:hover{background:var(--danger-dim);border-color:var(--danger)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-ghost{background:transparent;border-color:transparent}
+.btn-ghost:hover{background:var(--card)}
 
-/* Form fields */
-.field { margin-bottom: 16px; }
-.field label {
-  display: block; font-size: 11px; font-weight: 700;
-  letter-spacing: .06em; color: var(--muted); margin-bottom: 5px;
-  text-transform: uppercase;
+/* Fields */
+.field{margin-bottom:14px}
+.field label{
+  display:flex;align-items:center;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:4px;text-transform:uppercase;
 }
-.field input, .field textarea, .field select {
-  width: 100%; padding: 9px 12px;
-  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
-  color: var(--fg); outline: none; transition: border-color .15s;
+.field label .sym-trigger{
+  margin-left:auto;font-size:14px;cursor:pointer;opacity:.4;
+  transition:opacity .12s;user-select:none;
 }
-.field input:focus, .field textarea:focus, .field select:focus {
-  border-color: var(--primary);
+.field label .sym-trigger:hover{opacity:1;color:var(--accent)}
+.field input,.field textarea,.field select{
+  width:100%;padding:8px 10px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--fg);outline:none;transition:border-color .12s;
 }
-.field textarea { resize: vertical; min-height: 80px; }
-.field select { cursor: pointer; }
-.field-row { display: flex; gap: 12px; }
-.field-row .field { flex: 1; }
-.field-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.field input:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-dim)}
+.field textarea{resize:vertical;min-height:68px;line-height:1.6}
+.field select{cursor:pointer}
+.field-row{display:flex;gap:10px}
+.field-row>.field{flex:1}
+.field-hint{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* Image preview */
+.thumb-preview{
+  width:80px;height:45px;border-radius:4px;overflow:hidden;
+  border:1px solid var(--border);background:var(--bg);flex-shrink:0;
+}
+.thumb-preview img{width:100%;height:100%;object-fit:cover}
+.thumb-preview.empty{display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--border)}
 
 /* Toggle */
-.toggle-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.toggle{
+  width:34px;height:18px;border-radius:9px;
+  background:var(--border);position:relative;cursor:pointer;
+  transition:background .15s;border:none;flex-shrink:0;
 }
-.toggle {
-  width: 36px; height: 20px; border-radius: 10px;
-  background: var(--border); position: relative; cursor: pointer;
-  transition: background .15s; border: none;
+.toggle.on{background:var(--primary)}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--fg);transition:transform .15s;
 }
-.toggle.on { background: var(--primary); }
-.toggle::after {
-  content: ''; position: absolute; top: 2px; left: 2px;
-  width: 16px; height: 16px; border-radius: 50%;
-  background: var(--fg); transition: transform .15s;
-}
-.toggle.on::after { transform: translateX(16px); }
-.toggle-label { font-size: 13px; }
+.toggle.on::after{transform:translateX(16px)}
+.toggle-label{font-size:12px;color:var(--muted)}
 
-/* Cards */
-.editor-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: 10px;
-  transition: border-color .15s;
+/* Editor cards */
+.e-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:8px;
+  transition:border-color .12s,box-shadow .12s;
 }
-.editor-card:hover { border-color: #3a3c50; }
-.editor-card.dragging { opacity: .4; }
-.editor-card.drag-over { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.e-card:hover{border-color:var(--border-light)}
+.e-card.dragging{opacity:.35;transform:scale(.98)}
+.e-card.drag-over{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
 
-.card-header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px; cursor: pointer; user-select: none;
+.e-card-head{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;cursor:pointer;user-select:none;
+  transition:background .08s;border-radius:var(--radius);
 }
-.drag-handle {
-  cursor: grab; color: var(--muted); flex-shrink: 0; font-size: 14px;
-  display: flex; align-items: center;
+.e-card-head:hover{background:var(--card-hover)}
+.drag-handle{
+  cursor:grab;color:var(--border-light);font-size:13px;
+  display:flex;align-items:center;transition:color .1s;flex-shrink:0;
 }
-.drag-handle:active { cursor: grabbing; }
-.card-title { font-weight: 600; flex: 1; }
-.card-subtitle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.card-badge {
-  font-family: var(--mono); font-size: 10px; font-weight: 700;
-  padding: 2px 8px; border-radius: 3px; letter-spacing: .04em;
+.drag-handle:hover{color:var(--muted)}
+.drag-handle:active{cursor:grabbing}
+.e-card-title{font-weight:600;flex:1;font-size:13px}
+.e-card-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.e-card-badge{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  padding:2px 7px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;
 }
-.card-badge.completed { background: rgba(45,212,191,.15); color: var(--primary); }
-.card-badge.ongoing   { background: rgba(167,139,250,.15); color: var(--accent); }
-.card-chevron {
-  color: var(--muted); transition: transform .15s; flex-shrink: 0;
+.e-card-badge.completed{background:rgba(45,212,191,.12);color:var(--primary)}
+.e-card-badge.ongoing{background:rgba(167,139,250,.12);color:var(--accent)}
+.chevron{
+  color:var(--muted);transition:transform .15s;flex-shrink:0;font-size:11px;
 }
-.card-chevron.open { transform: rotate(90deg); }
-.card-body { padding: 0 16px 16px; display: none; }
-.card-body.open { display: block; }
-.card-actions {
-  display: flex; gap: 8px; padding: 8px 16px; border-top: 1px solid var(--border);
+.chevron.open{transform:rotate(90deg)}
+.e-card-body{padding:0 14px 14px;display:none}
+.e-card-body.open{display:block}
+.e-card-foot{
+  display:flex;gap:6px;padding:6px 14px;
+  border-top:1px solid var(--border);
 }
 
-/* Tag editor */
-.tag-editor { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.tag-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 3px; padding: 3px 8px;
-  font-family: var(--mono); font-size: 11px; color: var(--primary);
+/* Tags */
+.tag-editor{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:6px 0}
+.tag-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  background:var(--bg);border:1px solid var(--border);border-radius:3px;
+  padding:2px 7px;font-family:var(--mono);font-size:10px;color:var(--primary);
 }
-.tag-pill button {
-  background: none; border: none; color: var(--muted); cursor: pointer;
-  font-size: 14px; line-height: 1; padding: 0 0 0 2px;
+.tag-pill button{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:13px;line-height:1;padding:0;
 }
-.tag-pill button:hover { color: var(--danger); }
-.tag-input {
-  background: none; border: none; color: var(--fg); outline: none;
-  font-family: var(--mono); font-size: 11px; width: 80px;
+.tag-pill button:hover{color:var(--danger)}
+.tag-input{
+  background:none;border:1px solid transparent;border-radius:3px;
+  color:var(--fg);outline:none;font-family:var(--mono);font-size:10px;
+  width:70px;padding:2px 6px;
 }
+.tag-input:focus{border-color:var(--border);background:var(--bg)}
 
 /* Skill slider */
-.skill-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-  padding: 6px 0;
+.sk-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:4px 0}
+.sk-name-input{
+  flex:1;background:transparent;border:1px solid transparent;
+  color:var(--fg);padding:3px 6px;border-radius:4px;font-size:12px;min-width:0;
 }
-.skill-row .drag-handle { margin-right: -4px; }
-.skill-name-input {
-  flex: 1; background: transparent; border: 1px solid transparent;
-  color: var(--fg); padding: 4px 8px; border-radius: 4px;
-  font-size: 13px;
+.sk-name-input:focus{border-color:var(--border);background:var(--bg)}
+.sk-slider{
+  -webkit-appearance:none;width:110px;height:3px;
+  background:var(--border);border-radius:2px;outline:none;cursor:pointer;
 }
-.skill-name-input:focus { border-color: var(--border); background: var(--bg); }
-.skill-slider {
-  -webkit-appearance: none; width: 120px; height: 4px;
-  background: var(--border); border-radius: 2px; outline: none;
+.sk-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:12px;height:12px;
+  border-radius:50%;background:var(--primary);cursor:pointer;
+  box-shadow:0 0 6px rgba(45,212,191,.3);
 }
-.skill-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 14px; height: 14px;
-  border-radius: 50%; background: var(--primary); cursor: pointer;
-}
-.skill-pct {
-  font-family: var(--mono); font-size: 12px; color: var(--muted);
-  width: 36px; text-align: right;
-}
-.skill-remove {
-  background: none; border: none; color: var(--muted); cursor: pointer;
-  font-size: 16px; padding: 0 4px;
-}
-.skill-remove:hover { color: var(--danger); }
+.sk-pct{font-family:var(--mono);font-size:11px;color:var(--muted);width:32px;text-align:right}
+.sk-del{background:none;border:none;color:var(--border-light);cursor:pointer;font-size:14px;padding:0 2px}
+.sk-del:hover{color:var(--danger)}
 
-/* List editor (for bio paragraphs, highlights, roles, etc.) */
-.list-item {
-  display: flex; gap: 8px; align-items: flex-start;
-  margin-bottom: 8px; padding: 8px; background: var(--bg);
-  border: 1px solid var(--border); border-radius: var(--radius);
+/* List items */
+.list-item{
+  display:flex;gap:6px;align-items:flex-start;
+  margin-bottom:6px;padding:6px 8px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+  transition:border-color .1s;
 }
-.list-item .drag-handle { margin-top: 4px; }
-.list-item textarea {
-  flex: 1; background: transparent; border: none; color: var(--fg);
-  resize: vertical; min-height: 36px; outline: none; padding: 4px;
-  font-size: 13px; line-height: 1.5;
+.list-item:focus-within{border-color:var(--border-light)}
+.list-item .drag-handle{margin-top:6px}
+.list-item textarea{
+  flex:1;background:transparent;border:none;color:var(--fg);
+  resize:vertical;min-height:32px;outline:none;padding:3px 4px;
+  font-size:12px;line-height:1.5;
 }
-.list-item textarea:focus { background: var(--surface); border-radius: 4px; }
-.list-item .btn-danger { align-self: flex-start; margin-top: 2px; }
 
 /* Detail section builder */
-.section-block {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px; margin-bottom: 10px;
+.sec-block{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px;margin-bottom:8px;
 }
-.section-block-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+.sec-block-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sec-cols{display:flex;gap:10px}
+.sec-cols.two-col>*{flex:1}
+.sec-col{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px;min-width:0;
 }
-.section-block-header .drag-handle { cursor: grab; }
-.section-cols { display: flex; gap: 12px; }
-.section-cols.two-col > * { flex: 1; }
-.section-col {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 6px; padding: 12px;
+.col-type-btns{display:flex;gap:4px;margin-bottom:6px}
+.col-type-btn{
+  padding:3px 8px;font-size:10px;font-weight:600;
+  border:1px solid var(--border);border-radius:3px;
+  background:transparent;color:var(--muted);cursor:pointer;transition:all .1s;
+}
+.col-type-btn.active{background:var(--primary-dim);border-color:rgba(45,212,191,.3);color:var(--primary)}
+.col-type-btn:hover:not(.active){color:var(--fg)}
+.bullet-row{display:flex;gap:4px;margin-bottom:3px;align-items:center}
+.bullet-row::before{content:'▹';color:var(--primary);font-size:11px;flex-shrink:0}
+.bullet-row input{
+  flex:1;background:var(--bg);border:1px solid var(--border);
+  border-radius:3px;color:var(--fg);padding:3px 6px;font-size:11px;outline:none;
+}
+.bullet-row input:focus{border-color:var(--primary)}
+.bullet-del{background:none;border:none;color:var(--border-light);cursor:pointer;font-size:12px}
+.bullet-del:hover{color:var(--danger)}
+
+/* Search */
+.search-box{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+  padding:0 10px;margin-bottom:14px;
+}
+.search-box svg{width:14px;height:14px;color:var(--muted);flex-shrink:0}
+.search-box input{
+  flex:1;background:none;border:none;color:var(--fg);padding:7px 0;outline:none;font-size:12px;
 }
 
-/* Toast */
-.toast {
-  position: fixed; bottom: 24px; right: 24px;
-  background: var(--primary); color: var(--bg);
-  padding: 12px 20px; border-radius: var(--radius);
-  font-weight: 600; font-size: 13px;
-  transform: translateY(80px); opacity: 0;
-  transition: all .3s ease; z-index: 999;
+/* ================================================================
+   SYMBOL PICKER MODAL
+   ================================================================ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
 }
-.toast.show { transform: translateY(0); opacity: 1; }
-
-/* Empty state */
-.empty-state {
-  text-align: center; padding: 48px 20px; color: var(--muted);
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;width:480px;max-width:92vw;max-height:80vh;
+  box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;
 }
-.empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: .3; }
-.empty-state p { margin-bottom: 16px; }
+.modal-head{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.modal-head h3{font-size:14px;font-weight:700;flex:1}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:20px;padding:0 4px;transition:color .1s;
+}
+.modal-close:hover{color:var(--fg)}
+.modal-body{padding:14px 18px;overflow-y:auto;flex:1}
+.sym-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.sym-tab{
+  padding:4px 10px;font-size:11px;font-weight:600;
+  border:1px solid var(--border);border-radius:4px;
+  background:transparent;color:var(--muted);cursor:pointer;
+  transition:all .1s;
+}
+.sym-tab:hover{color:var(--fg)}
+.sym-tab.active{background:var(--primary-dim);border-color:rgba(45,212,191,.3);color:var(--primary)}
+.sym-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:4px}
+.sym-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;font-size:17px;
+  background:var(--card);border:1px solid var(--border);border-radius:4px;
+  cursor:pointer;transition:all .1s;color:var(--fg);
+}
+.sym-btn:hover{border-color:var(--primary);background:var(--primary-dim);transform:scale(1.1)}
 
-/* Responsive */
-@media (max-width: 700px) {
-  .sidebar { width: 56px; min-width: 56px; }
-  .sidebar a span { display: none; }
-  .sidebar-section { display: none; }
-  .sidebar a { padding: 12px 0; justify-content: center; }
-  .main { padding: 20px 16px 60px; }
-  .field-row { flex-direction: column; gap: 0; }
+/* ================================================================
+   TOAST
+   ================================================================ */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--card);border:1px solid var(--border);
+  padding:10px 20px;border-radius:var(--radius);
+  font-weight:600;font-size:12px;box-shadow:var(--shadow);
+  opacity:0;transition:all .3s;z-index:999;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast svg{width:16px;height:16px}
+.toast.success{border-color:rgba(45,212,191,.3);color:var(--primary)}
+.toast.error{border-color:rgba(248,113,113,.3);color:var(--danger)}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media(max-width:700px){
+  .split-preview{display:none!important}
+  .split-handle{display:none}
+  .field-row{flex-direction:column;gap:0}
 }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <!-- TOOLBAR -->
+  <!-- ======== TOOLBAR ======== -->
   <header class="toolbar">
-    <div class="toolbar-title">&lt;TB/&gt; <span>Portfolio Editor</span></div>
+    <span class="toolbar-logo">&lt;TB/&gt;</span>
+    <span style="font-size:12px;color:var(--muted)">CMS</span>
+    <span class="toolbar-sep"></span>
+
+    <div class="toolbar-group">
+      <button class="tb" id="btn-undo" onclick="undo()" title="Undo (Ctrl+Z)" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      </button>
+      <button class="tb" id="btn-redo" onclick="redo()" title="Redo (Ctrl+Y)" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+
+    <span class="toolbar-sep"></span>
+
+    <button class="tb tb-accent" onclick="openSymbolPicker()" title="Insert Symbol">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <span class="tb-label">Symbols</span>
+    </button>
+
     <div class="toolbar-spacer"></div>
-    <button class="btn" onclick="previewSite()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      Preview
-    </button>
-    <button class="btn" onclick="importFile()">
+
+    <div class="save-status" id="save-status">
+      <span class="save-dot" id="save-dot"></span>
+      <span id="save-text">Saved</span>
+    </div>
+
+    <button class="tb" onclick="importFile()" title="Import content.js">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Import
+      <span class="tb-label">Import</span>
     </button>
-    <button class="btn btn-primary" onclick="exportFile()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export content.js
+    <button class="tb tb-primary" onclick="saveFile()" title="Save (Ctrl+S)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span class="tb-label">Save</span>
+    </button>
+
+    <span class="toolbar-sep"></span>
+
+    <button class="tb" id="btn-preview-toggle" onclick="togglePreview()" title="Toggle Live Preview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span class="tb-label">Preview</span>
     </button>
   </header>
 
-  <div class="body">
-    <!-- SIDEBAR -->
-    <nav class="sidebar">
-      <div class="sidebar-section">Content</div>
-      <a class="active" data-tab="hero" onclick="switchTab('hero')">
+  <div class="app-body">
+    <!-- ======== SIDEBAR ======== -->
+    <nav class="sidebar" id="sidebar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('expanded')" title="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="sb-link active" data-tab="hero" data-tooltip="Hero" onclick="switchTab('hero')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span>Hero</span>
-      </a>
-      <a data-tab="projects" onclick="switchTab('projects')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </button>
+      <button class="sb-link" data-tab="projects" data-tooltip="Projects" onclick="switchTab('projects')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Projects</span>
-      </a>
-      <a data-tab="skills" onclick="switchTab('skills')">
+      </button>
+      <button class="sb-link" data-tab="skills" data-tooltip="Skills" onclick="switchTab('skills')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <span>Skills</span>
-      </a>
-      <a data-tab="about" onclick="switchTab('about')">
+      </button>
+      <button class="sb-link" data-tab="about" data-tooltip="About" onclick="switchTab('about')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>About</span>
-      </a>
-      <a data-tab="contact" onclick="switchTab('contact')">
+      </button>
+      <button class="sb-link" data-tab="contact" data-tooltip="Contact" onclick="switchTab('contact')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         <span>Contact</span>
-      </a>
-      <div class="sidebar-section">Settings</div>
-      <a data-tab="meta" onclick="switchTab('meta')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Site Meta</span>
-      </a>
+      </button>
+      <div class="sb-sep"></div>
+      <button class="sb-link" data-tab="meta" data-tooltip="Settings" onclick="switchTab('meta')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2m-9-11h2m18 0h2m-3.3-6.7-1.4 1.4M6.7 17.3l-1.4 1.4m0-13.4 1.4 1.4m10.6 10.6 1.4 1.4"/></svg>
+        <span>Settings</span>
+      </button>
     </nav>
 
-    <!-- MAIN CONTENT -->
-    <div class="main" id="main"></div>
+    <!-- ======== SPLIT PANE ======== -->
+    <div class="split">
+      <div class="split-editor" id="main"></div>
+      <div class="split-handle" id="split-handle"></div>
+      <div class="split-preview" id="split-preview">
+        <div class="preview-bar">
+          <span class="muted">Preview</span>
+          <select id="preview-page" onchange="refreshPreview()">
+            <option value="index.html?draft=1">Home</option>
+            <option value="project.html?draft=1&amp;id=">Project...</option>
+            <option value="resume.html?draft=1">Resume</option>
+          </select>
+          <select id="preview-project" style="display:none" onchange="refreshPreview()"></select>
+          <span class="preview-url" id="preview-url"></span>
+        </div>
+        <iframe id="preview-frame" title="Live preview"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Symbol picker modal -->
+<div class="modal-overlay" id="sym-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Insert Symbol</h3>
+      <button class="modal-close" onclick="closeSymbolPicker()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="sym-tabs" id="sym-tabs"></div>
+      <div class="sym-grid" id="sym-grid"></div>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<input type="file" id="file-input" accept=".js" style="display:none"/>
+<input type="file" id="file-input" accept=".js,.json" style="display:none"/>
 
+<!-- ================================================================
+     SCRIPT
+     ================================================================ -->
 <script src="content.js"></script>
 <script>
 // ================================================================
-//  STATE — deep-clone SITE so we can mutate freely
+//  STATE
 // ================================================================
 let data = JSON.parse(JSON.stringify(SITE));
 let currentTab = "hero";
+let previewVisible = true;
+let fileHandle = null;
+let dirty = false;
+let searchQuery = "";
+var openCards = new Set();   // tracks which cards are expanded
+var focusAfterRender = null; // selector to refocus after render
+
+// ---- Undo / Redo -----------------------------------------------
+const MAX_HISTORY = 60;
+let history = [JSON.stringify(data)];
+let historyIdx = 0;
+
+function snapshot() {
+  const s = JSON.stringify(data);
+  if (s === history[historyIdx]) return;
+  history = history.slice(0, historyIdx + 1);
+  history.push(s);
+  if (history.length > MAX_HISTORY) history.shift();
+  historyIdx = history.length - 1;
+  updateUndoRedo();
+}
+function undo() {
+  if (historyIdx <= 0) return;
+  data = JSON.parse(history[--historyIdx]);
+  render(); markDirty(); updateUndoRedo(); scheduleSave();
+}
+function redo() {
+  if (historyIdx >= history.length - 1) return;
+  data = JSON.parse(history[++historyIdx]);
+  render(); markDirty(); updateUndoRedo(); scheduleSave();
+}
+function updateUndoRedo() {
+  document.getElementById("btn-undo").disabled = historyIdx <= 0;
+  document.getElementById("btn-redo").disabled = historyIdx >= history.length - 1;
+}
 
 // ================================================================
 //  HELPERS
 // ================================================================
-function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function esc(s) { if (s == null) return ""; const d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
 
-function toast(msg) {
+function toast(msg, type) {
+  type = type || "success";
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2200);
+  t.className = "toast show " + type;
+  const icon = type === "success"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  t.innerHTML = icon + msg;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function() { t.classList.remove("show"); }, 2400);
 }
 
+function markDirty() {
+  dirty = true;
+  document.getElementById("save-dot").className = "save-dot dirty";
+  document.getElementById("save-text").textContent = "Unsaved";
+}
+function markClean() {
+  dirty = false;
+  document.getElementById("save-dot").className = "save-dot";
+  document.getElementById("save-text").textContent = "Saved";
+}
+
+function onChange() {
+  markDirty();
+  snapshot();
+  scheduleSave();
+  schedulePreviewRefresh();
+}
+
+// ---- Auto-save to localStorage ----------------------------------
+var saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function() {
+    localStorage.setItem("portfolio-draft", JSON.stringify(data));
+  }, 300);
+}
+
+// ---- Preview refresh (debounced) --------------------------------
+var previewTimer = null;
+function schedulePreviewRefresh() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(refreshPreview, 800);
+}
+
+
+// ================================================================
+//  TAB SWITCHING & RENDER
+// ================================================================
 function switchTab(tab) {
   currentTab = tab;
-  document.querySelectorAll(".sidebar a").forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
+  document.querySelectorAll(".sb-link").forEach(function(a) { a.classList.toggle("active", a.dataset.tab === tab); });
   render();
 }
 
 function render() {
-  const m = document.getElementById("main");
-  let preservedScroll = 0;
-  let preservedOpenCards = [];
-
-  // 1. Capture current scroll and open states
-  if (m) {
-    preservedScroll = m.scrollTop;
-    document.querySelectorAll(".editor-card").forEach(c => {
-      const body = c.querySelector(".card-body");
-      if (body && body.classList.contains("open")) {
-        preservedOpenCards.push(c.dataset.list + "-" + c.dataset.idx);
-      }
-    });
-  }
-
-  // 2. Re-render HTML
-  switch (currentTab) {
-    case "hero":     m.innerHTML = renderHero(); break;
-    case "projects": m.innerHTML = renderProjects(); break;
-    case "skills":   m.innerHTML = renderSkills(); break;
-    case "about":    m.innerHTML = renderAbout(); break;
-    case "contact":  m.innerHTML = renderContact(); break;
-    case "meta":     m.innerHTML = renderMeta(); break;
-  }
+  var m = document.getElementById("main");
+  var r = { hero: renderHero, projects: renderProjects, skills: renderSkills, about: renderAbout, contact: renderContact, meta: renderMeta };
+  m.innerHTML = (r[currentTab] || renderHero)();
   bindDragDrop();
-
-  // 3. Restore scroll and open states
-  if (m) {
-    document.querySelectorAll(".editor-card").forEach(c => {
-      const key = c.dataset.list + "-" + c.dataset.idx;
-      if (preservedOpenCards.includes(key)) {
-        const body = c.querySelector(".card-body");
-        const chev = c.querySelector(".card-chevron");
-        if (body) body.classList.add("open");
-        if (chev) chev.classList.add("open");
-      }
-    });
-    m.scrollTop = preservedScroll;
+  restoreOpenCards();
+  if (focusAfterRender) {
+    var el = m.querySelector(focusAfterRender);
+    if (el) { el.focus(); el.value = ""; }
+    focusAfterRender = null;
   }
 }
+
+function restoreOpenCards() {
+  document.querySelectorAll("[data-draggable]").forEach(function(card) {
+    var key = card.dataset.list + "-" + card.dataset.idx;
+    if (openCards.has(key)) {
+      var body = card.querySelector(".e-card-body");
+      var chev = card.querySelector(".chevron");
+      if (body) body.classList.add("open");
+      if (chev) chev.classList.add("open");
+    }
+  });
+}
+
 
 // ================================================================
 //  DRAG & DROP
 // ================================================================
-let dragSrcIdx = null;
-let dragListKey = null;
+var dragSrcIdx = null, dragListKey = null;
 
 function bindDragDrop() {
-  document.querySelectorAll("[data-draggable]").forEach(card => {
+  document.querySelectorAll("[data-draggable]").forEach(function(card) {
     card.setAttribute("draggable", "true");
-    card.addEventListener("dragstart", e => {
-      dragSrcIdx = parseInt(card.dataset.idx);
+    card.addEventListener("dragstart", function(e) {
+      dragSrcIdx = +card.dataset.idx;
       dragListKey = card.dataset.list;
       card.classList.add("dragging");
       e.dataTransfer.effectAllowed = "move";
     });
-    card.addEventListener("dragend", () => card.classList.remove("dragging"));
-    card.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; card.classList.add("drag-over"); });
-    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
-    card.addEventListener("drop", e => {
+    card.addEventListener("dragend", function() { card.classList.remove("dragging"); });
+    card.addEventListener("dragover", function(e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; card.classList.add("drag-over"); });
+    card.addEventListener("dragleave", function() { card.classList.remove("drag-over"); });
+    card.addEventListener("drop", function(e) {
       e.preventDefault();
       card.classList.remove("drag-over");
-      const targetIdx = parseInt(card.dataset.idx);
-      if (dragListKey === card.dataset.list && dragSrcIdx !== targetIdx) {
-        const arr = getListByKey(dragListKey);
-        const item = arr.splice(dragSrcIdx, 1)[0];
-        arr.splice(targetIdx, 0, item);
+      var ti = +card.dataset.idx;
+      if (dragListKey === card.dataset.list && dragSrcIdx !== ti) {
+        var arr = resolveKey(dragListKey);
+        arr.splice(ti, 0, arr.splice(dragSrcIdx, 1)[0]);
+        onChange();
         render();
-        toast("Reordered!");
       }
     });
   });
 }
 
-function getListByKey(key) {
-  const parts = key.split(".");
-  let obj = data;
-  for (const p of parts) {
-    if (/^\d+$/.test(p)) obj = obj[parseInt(p)];
-    else obj = obj[p];
-  }
-  return obj;
+function resolveKey(key) {
+  return key.split(".").reduce(function(o, k) { return o[/^\d+$/.test(k) ? +k : k]; }, data);
 }
 
 
@@ -482,31 +750,20 @@ function getListByKey(key) {
 //  HERO TAB
 // ================================================================
 function renderHero() {
-  const h = data.hero;
-  return `
-    <div class="sec-head"><h2>Hero Section</h2></div>
-
-    <div class="field">
-      <label>Label (small text above name)</label>
-      <input value="${esc(h.label)}" oninput="data.hero.label=this.value"/>
-    </div>
-
-    <div class="field">
-      <label>Bio</label>
-      <textarea rows="3" oninput="data.hero.bio=this.value">${esc(h.bio)}</textarea>
-    </div>
-
-    <div class="field">
-      <label>Cycling Roles</label>
-      <div class="field-hint">These cycle in the hero with a typing animation. Drag to reorder.</div>
-    </div>
-    ${h.roles.map((r, i) => `
-      <div class="list-item" data-draggable data-idx="${i}" data-list="hero.roles">
-        <div class="drag-handle">⠿</div>
-        <textarea rows="1" oninput="data.hero.roles[${i}]=this.value">${esc(r)}</textarea>
-        <button class="btn btn-sm btn-danger" onclick="data.hero.roles.splice(${i},1);render()">✕</button>
-      </div>`).join("")}
-    <button class="btn btn-sm" onclick="data.hero.roles.push('New Role');render()">+ Add Role</button>`;
+  var h = data.hero;
+  return '<div class="sec-head"><h2>Hero Section</h2></div>' +
+    '<div class="field"><label>Label <span class="sym-trigger" onclick="openSymbolPicker()">\u2726</span></label>' +
+    '<input value="' + esc(h.label) + '" oninput="data.hero.label=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Bio</label>' +
+    '<textarea rows="3" oninput="data.hero.bio=this.value;onChange()">' + esc(h.bio) + '</textarea></div>' +
+    '<div class="field"><label>Cycling Roles</label><div class="field-hint">These cycle with a typing animation. Drag to reorder.</div></div>' +
+    h.roles.map(function(r, i) {
+      return '<div class="list-item" data-draggable data-idx="' + i + '" data-list="hero.roles">' +
+        '<div class="drag-handle">\u2807</div>' +
+        '<textarea rows="1" oninput="data.hero.roles[' + i + ']=this.value;onChange()">' + esc(r) + '</textarea>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="data.hero.roles.splice(' + i + ',1);onChange();render()">\u2715</button></div>';
+    }).join("") +
+    '<button class="btn btn-sm" onclick="data.hero.roles.push(\'New Role\');onChange();render()">+ Add Role</button>';
 }
 
 
@@ -514,152 +771,113 @@ function renderHero() {
 //  PROJECTS TAB
 // ================================================================
 function renderProjects() {
-  return `
-    <div class="sec-head">
-      <h2>Projects</h2>
-      <span class="count">${data.projects.length}</span>
-      <div style="flex:1"></div>
-      <button class="btn btn-primary" onclick="addProject()">+ New Project</button>
-    </div>
-    ${data.projects.map((p, i) => renderProjectCard(p, i)).join("")}`;
+  var filtered = searchQuery
+    ? data.projects.filter(function(p) { return (p.title + p.subtitle + p.tags.join(" ") + p.description).toLowerCase().indexOf(searchQuery) >= 0; })
+    : data.projects;
+  return '<div class="sec-head"><h2>Projects</h2><span class="badge">' + data.projects.length + '</span><span class="spacer"></span>' +
+    '<button class="btn btn-primary" onclick="addProject()">+ New Project</button></div>' +
+    '<div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+    '<input placeholder="Search projects..." value="' + esc(searchQuery) + '" oninput="searchQuery=this.value.toLowerCase();render()"/></div>' +
+    filtered.map(function(p) { return renderProjectCard(p, data.projects.indexOf(p)); }).join("") +
+    (filtered.length === 0 ? '<div style="text-align:center;padding:40px;color:var(--muted)">No projects match.</div>' : '');
 }
 
 function renderProjectCard(p, i) {
-  const d = p.detail || {};
-  const sections = d.sections || [];
-  return `
-    <div class="editor-card" data-draggable data-idx="${i}" data-list="projects">
-      <div class="card-header" onclick="toggleCard(this)">
-        <div class="drag-handle">⠿</div>
-        ${p.thumb ? `<img src="${esc(p.thumb)}" style="width:48px;height:28px;object-fit:cover;border-radius:4px;"/>` : ""}
-        <span class="card-title">${esc(p.title || "Untitled")}</span>
-        <span class="card-subtitle">${esc(p.subtitle || "")}</span>
-        <span class="card-badge ${p.status}">${esc(p.status)}</span>
-        <span class="card-chevron">▸</span>
-      </div>
-      <div class="card-body">
-        <div class="field-row">
-          <div class="field"><label>Title</label><input value="${esc(p.title)}" oninput="data.projects[${i}].title=this.value;updateCardTitle(this,${i})"/></div>
-          <div class="field"><label>Subtitle</label><input value="${esc(p.subtitle)}" oninput="data.projects[${i}].subtitle=this.value"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>ID (URL slug)</label><input value="${esc(p.id)}" oninput="data.projects[${i}].id=this.value"/></div>
-          <div class="field">
-            <label>Status</label>
-            <select onchange="data.projects[${i}].status=this.value;render()">
-              <option value="completed"${p.status === "completed" ? " selected" : ""}>Completed</option>
-              <option value="ongoing"${p.status === "ongoing" ? " selected" : ""}>Ongoing</option>
-            </select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Thumbnail path</label><input value="${esc(p.thumb || "")}" oninput="data.projects[${i}].thumb=this.value||null" placeholder="assets/my-thumb.png"/></div>
-          <div class="field"><label>Hover video path</label><input value="${esc(p.video || "")}" oninput="data.projects[${i}].video=this.value||null" placeholder="assets/my-demo.mp4"/></div>
-        </div>
-        <div class="field">
-          <label>Card Description</label>
-          <textarea rows="2" oninput="data.projects[${i}].description=this.value">${esc(p.description)}</textarea>
-        </div>
-
-        <div class="field">
-          <label>Tags</label>
-          <div class="tag-editor" id="tags-${i}">
-            ${p.tags.map((t, ti) => `<span class="tag-pill">${esc(t)}<button onclick="data.projects[${i}].tags.splice(${ti},1);render()">×</button></span>`).join("")}
-            <input class="tag-input" placeholder="+ tag" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag(${i},this.value);this.value=''}"/>
-          </div>
-        </div>
-
-        <div class="toggle-row">
-          <button class="toggle${p.featured ? " on" : ""}" onclick="data.projects[${i}].featured=!data.projects[${i}].featured;this.classList.toggle('on')"></button>
-          <span class="toggle-label">Featured on home page</span>
-        </div>
-
-        <hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>
-        <h3 style="font-size:14px;margin-bottom:12px;color:var(--primary);">Detail Page</h3>
-
-        <div class="field">
-          <label>Lede (detail hero paragraph)</label>
-          <textarea rows="2" oninput="ensureDetail(${i});data.projects[${i}].detail.lede=this.value">${esc(d.lede || "")}</textarea>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Date</label><input value="${esc(d.date || "")}" oninput="ensureDetail(${i});data.projects[${i}].detail.date=this.value"/></div>
-          <div class="field"><label>Demo video src</label><input value="${esc(d.demoVideo?.src || "")}" oninput="setDemoVideo(${i},this.value)"/></div>
-        </div>
-
-        <div class="field"><label>Content Sections</label></div>
-        ${sections.map((sec, si) => renderSectionBlock(i, si, sec)).join("")}
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
-          <button class="btn btn-sm" onclick="addSection(${i},'single')">+ Single Section</button>
-          <button class="btn btn-sm" onclick="addSection(${i},'two-col')">+ Two-Column Section</button>
-        </div>
-
-        <div class="field"><label>Detail Page Links</label></div>
-        ${(d.links || []).map((l, li) => `
-          <div class="list-item">
-            <input style="flex:1" value="${esc(l.label)}" placeholder="Label" oninput="data.projects[${i}].detail.links[${li}].label=this.value"/>
-            <input style="flex:2" value="${esc(l.url)}" placeholder="URL" oninput="data.projects[${i}].detail.links[${li}].url=this.value"/>
-            <select style="width:90px" onchange="data.projects[${i}].detail.links[${li}].icon=this.value">
-              ${["github","external","arrow"].map(ic => `<option${l.icon===ic?" selected":""}>${ic}</option>`).join("")}
-            </select>
-            <button class="btn btn-sm btn-danger" onclick="data.projects[${i}].detail.links.splice(${li},1);render()">✕</button>
-          </div>`).join("")}
-        <button class="btn btn-sm" onclick="ensureDetail(${i});data.projects[${i}].detail.links.push({label:'',url:'',icon:'github'});render()">+ Add Link</button>
-      </div>
-      <div class="card-actions">
-        <button class="btn btn-sm" onclick="duplicateProject(${i})">Duplicate</button>
-        <div style="flex:1"></div>
-        <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete this project?')){data.projects.splice(${i},1);render();toast('Project deleted')}">Delete</button>
-      </div>
-    </div>`;
+  var d = p.detail || {};
+  var secs = d.sections || [];
+  var thumbHTML = p.thumb
+    ? '<div class="thumb-preview"><img src="' + esc(p.thumb) + '" alt=""/></div>'
+    : '<div class="thumb-preview empty">\u25A1</div>';
+  var html = '<div class="e-card" data-draggable data-idx="' + i + '" data-list="projects">' +
+    '<div class="e-card-head" onclick="toggleCard(this)">' +
+    '<div class="drag-handle">\u2807</div>' + thumbHTML +
+    '<span class="e-card-title">' + esc(p.title || "Untitled") + '</span>' +
+    '<span class="e-card-sub">' + esc(p.subtitle) + '</span>' +
+    '<span class="e-card-badge ' + p.status + '">' + p.status + '</span>' +
+    '<span class="chevron">\u25B8</span></div>' +
+    '<div class="e-card-body">' +
+    '<div class="field-row"><div class="field"><label>Title</label><input value="' + esc(p.title) + '" oninput="data.projects[' + i + '].title=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Subtitle</label><input value="' + esc(p.subtitle) + '" oninput="data.projects[' + i + '].subtitle=this.value;onChange()"/></div></div>' +
+    '<div class="field-row"><div class="field"><label>ID (url slug)</label><input value="' + esc(p.id) + '" oninput="data.projects[' + i + '].id=this.value;onChange()" style="font-family:var(--mono)"/></div>' +
+    '<div class="field"><label>Status</label><select onchange="data.projects[' + i + '].status=this.value;onChange();render()">' +
+    '<option value="completed"' + (p.status === "completed" ? " selected" : "") + '>Completed</option>' +
+    '<option value="ongoing"' + (p.status === "ongoing" ? " selected" : "") + '>Ongoing</option></select></div></div>' +
+    '<div class="field-row"><div class="field"><label>Thumbnail</label><input value="' + esc(p.thumb || "") + '" placeholder="assets/thumb.png" oninput="data.projects[' + i + '].thumb=this.value||null;onChange()"/></div>' +
+    '<div class="field"><label>Hover video</label><input value="' + esc(p.video || "") + '" placeholder="assets/demo.mp4" oninput="data.projects[' + i + '].video=this.value||null;onChange()"/></div></div>' +
+    '<div class="field"><label>Card Description <span class="sym-trigger" onclick="openSymbolPicker()">\u2726</span></label>' +
+    '<textarea rows="2" oninput="data.projects[' + i + '].description=this.value;onChange()">' + esc(p.description) + '</textarea></div>' +
+    '<div class="field"><label>Tags</label><div class="tag-editor">' +
+    p.tags.map(function(t, ti) { return '<span class="tag-pill">' + esc(t) + '<button onclick="data.projects[' + i + '].tags.splice(' + ti + ',1);onChange();render()">\u00D7</button></span>'; }).join("") +
+    '<input class="tag-input" placeholder="+ tag \u21B5" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addTag(' + i + ',this.value);this.value=\'\'}"/></div></div>' +
+    '<div class="toggle-row"><button class="toggle' + (p.featured ? " on" : "") + '" onclick="data.projects[' + i + '].featured=!data.projects[' + i + '].featured;this.classList.toggle(\'on\');onChange()"></button>' +
+    '<span class="toggle-label">Featured on home page</span></div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:16px 0"/>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' +
+    '<span style="font-size:13px;font-weight:700;color:var(--primary)">Detail Page</span>' +
+    '<button class="btn btn-sm btn-ghost" onclick="previewProject(\'' + esc(p.id) + '\')" title="Preview">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview</button></div>' +
+    '<div class="field"><label>Lede <span class="sym-trigger" onclick="openSymbolPicker()">\u2726</span></label>' +
+    '<textarea rows="2" oninput="ensureDetail(' + i + ');data.projects[' + i + '].detail.lede=this.value;onChange()">' + esc(d.lede || "") + '</textarea></div>' +
+    '<div class="field-row"><div class="field"><label>Date</label><input value="' + esc(d.date || "") + '" oninput="ensureDetail(' + i + ');data.projects[' + i + '].detail.date=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Demo video src</label><input value="' + esc(d.demoVideo && d.demoVideo.src ? d.demoVideo.src : "") + '" oninput="setDemoVideo(' + i + ',this.value);onChange()"/></div></div>' +
+    '<div class="field"><label>Content Sections</label></div>' +
+    secs.map(function(sec, si) { return renderSecBlock(i, si, sec); }).join("") +
+    '<div style="display:flex;gap:6px;margin-bottom:14px">' +
+    '<button class="btn btn-sm" onclick="addSection(' + i + ',\'single\');onChange()">+ Single Section</button>' +
+    '<button class="btn btn-sm" onclick="addSection(' + i + ',\'two-col\');onChange()">+ Two-Column</button></div>' +
+    '<div class="field"><label>Detail Links</label></div>' +
+    (d.links || []).map(function(l, li) {
+      return '<div style="display:flex;gap:6px;margin-bottom:4px;align-items:center">' +
+        '<input style="flex:1" value="' + esc(l.label) + '" placeholder="Label" oninput="data.projects[' + i + '].detail.links[' + li + '].label=this.value;onChange()"/>' +
+        '<input style="flex:2" value="' + esc(l.url) + '" placeholder="https://..." oninput="data.projects[' + i + '].detail.links[' + li + '].url=this.value;onChange()"/>' +
+        '<select style="width:85px" onchange="data.projects[' + i + '].detail.links[' + li + '].icon=this.value;onChange()">' +
+        ["github","external","arrow"].map(function(ic) { return '<option' + (l.icon === ic ? " selected" : "") + '>' + ic + '</option>'; }).join("") +
+        '</select><button class="btn btn-sm btn-danger btn-ghost" onclick="data.projects[' + i + '].detail.links.splice(' + li + ',1);onChange();render()">\u2715</button></div>';
+    }).join("") +
+    '<button class="btn btn-sm" onclick="ensureDetail(' + i + ');data.projects[' + i + '].detail.links.push({label:\'\',url:\'\',icon:\'github\'});onChange();render()">+ Add Link</button>' +
+    '</div>' +
+    '<div class="e-card-foot"><button class="btn btn-sm btn-ghost" onclick="duplicateProject(' + i + ')">Duplicate</button>' +
+    '<span style="flex:1"></span>' +
+    '<button class="btn btn-sm btn-danger btn-ghost" onclick="if(confirm(\'Delete this project?\')){data.projects.splice(' + i + ',1);onChange();render();toast(\'Project deleted\')}">Delete</button></div></div>';
+  return html;
 }
 
-function renderSectionBlock(pi, si, sec) {
-  const cols = sec.columns || [];
-  return `
-    <div class="section-block" data-draggable data-idx="${si}" data-list="projects.${pi}.detail.sections">
-      <div class="section-block-header">
-        <div class="drag-handle">⠿</div>
-        <select style="width:120px" onchange="data.projects[${pi}].detail.sections[${si}].layout=this.value;render()">
-          <option value="single"${sec.layout==="single"?" selected":""}>Single</option>
-          <option value="two-col"${sec.layout==="two-col"?" selected":""}>Two Column</option>
-        </select>
-        <div style="flex:1"></div>
-        <button class="btn btn-sm" onclick="addColumn(${pi},${si})">+ Column</button>
-        <button class="btn btn-sm btn-danger" onclick="data.projects[${pi}].detail.sections.splice(${si},1);render()">✕</button>
-      </div>
-      <div class="section-cols${sec.layout==="two-col"?" two-col":""}">
-        ${cols.map((col, ci) => renderColumnEditor(pi, si, ci, col)).join("")}
-      </div>
-    </div>`;
+function renderSecBlock(pi, si, sec) {
+  return '<div class="sec-block" data-draggable data-idx="' + si + '" data-list="projects.' + pi + '.detail.sections">' +
+    '<div class="sec-block-head"><div class="drag-handle">\u2807</div>' +
+    '<select style="width:110px;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:11px" onchange="data.projects[' + pi + '].detail.sections[' + si + '].layout=this.value;onChange();render()">' +
+    '<option value="single"' + (sec.layout === "single" ? " selected" : "") + '>Single</option>' +
+    '<option value="two-col"' + (sec.layout === "two-col" ? " selected" : "") + '>Two Column</option></select>' +
+    '<span style="flex:1"></span>' +
+    '<button class="btn btn-sm btn-ghost" onclick="addColumn(' + pi + ',' + si + ');onChange()">+ Col</button>' +
+    '<button class="btn btn-sm btn-danger btn-ghost" onclick="data.projects[' + pi + '].detail.sections.splice(' + si + ',1);onChange();render()">\u2715</button></div>' +
+    '<div class="sec-cols' + (sec.layout === "two-col" ? " two-col" : "") + '">' +
+    (sec.columns || []).map(function(col, ci) { return renderColEditor(pi, si, ci, col); }).join("") +
+    '</div></div>';
 }
 
-function renderColumnEditor(pi, si, ci, col) {
-  const hasItems = Array.isArray(col.items);
-  return `
-    <div class="section-col">
-      <div class="field">
-        <label>Title</label>
-        <input value="${esc(col.title || "")}" oninput="data.projects[${pi}].detail.sections[${si}].columns[${ci}].title=this.value"/>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <button class="btn btn-sm${!hasItems?" btn-primary":""}" onclick="switchColToText(${pi},${si},${ci})">Text</button>
-        <button class="btn btn-sm${hasItems?" btn-primary":""}" onclick="switchColToList(${pi},${si},${ci})">Bullet List</button>
-        <div style="flex:1"></div>
-        <button class="btn btn-sm btn-danger" onclick="data.projects[${pi}].detail.sections[${si}].columns.splice(${ci},1);render()">✕</button>
-      </div>
-      ${hasItems
-        ? col.items.map((item, ii) => `
-            <div style="display:flex;gap:6px;margin-bottom:4px;">
-              <span style="color:var(--primary);margin-top:3px;">▹</span>
-              <input style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--fg);padding:4px 8px;font-size:12px;"
-                value="${esc(item)}" oninput="data.projects[${pi}].detail.sections[${si}].columns[${ci}].items[${ii}]=this.value"/>
-              <button class="btn btn-sm btn-danger" style="padding:2px 6px" onclick="data.projects[${pi}].detail.sections[${si}].columns[${ci}].items.splice(${ii},1);render()">✕</button>
-            </div>`).join("") +
-          `<button class="btn btn-sm" style="margin-top:4px" onclick="data.projects[${pi}].detail.sections[${si}].columns[${ci}].items.push('');render()">+ Item</button>`
-        : `<textarea rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--fg);padding:8px;font-size:12px;resize:vertical;"
-            oninput="data.projects[${pi}].detail.sections[${si}].columns[${ci}].text=this.value">${esc(col.text || "")}</textarea>`
-      }
-    </div>`;
+function renderColEditor(pi, si, ci, col) {
+  var hasList = Array.isArray(col.items);
+  var body;
+  if (hasList) {
+    body = (col.items || []).map(function(item, ii) {
+      return '<div class="bullet-row"><input value="' + esc(item) + '" oninput="data.projects[' + pi + '].detail.sections[' + si + '].columns[' + ci + '].items[' + ii + ']=this.value;onChange()"/>' +
+        '<button class="bullet-del" onclick="data.projects[' + pi + '].detail.sections[' + si + '].columns[' + ci + '].items.splice(' + ii + ',1);onChange();render()">\u2715</button></div>';
+    }).join("") +
+    '<button class="btn btn-sm btn-ghost" style="margin-top:4px;font-size:10px" onclick="data.projects[' + pi + '].detail.sections[' + si + '].columns[' + ci + '].items.push(\'\');onChange();render()">+ Item</button>';
+  } else {
+    body = '<textarea rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:11px;resize:vertical;line-height:1.5;outline:none" ' +
+      'oninput="data.projects[' + pi + '].detail.sections[' + si + '].columns[' + ci + '].text=this.value;onChange()">' + esc(col.text || "") + '</textarea>';
+  }
+  return '<div class="sec-col">' +
+    '<div class="field" style="margin-bottom:8px"><label>Title <span class="sym-trigger" onclick="openSymbolPicker()">\u2726</span></label>' +
+    '<input value="' + esc(col.title || "") + '" oninput="data.projects[' + pi + '].detail.sections[' + si + '].columns[' + ci + '].title=this.value;onChange()" style="font-size:12px"/></div>' +
+    '<div class="col-type-btns">' +
+    '<button class="col-type-btn' + (!hasList ? " active" : "") + '" onclick="switchColText(' + pi + ',' + si + ',' + ci + ')">Text</button>' +
+    '<button class="col-type-btn' + (hasList ? " active" : "") + '" onclick="switchColList(' + pi + ',' + si + ',' + ci + ')">Bullets</button>' +
+    '<span style="flex:1"></span>' +
+    '<button class="btn btn-sm btn-danger btn-ghost" style="padding:2px 6px" onclick="data.projects[' + pi + '].detail.sections[' + si + '].columns.splice(' + ci + ',1);onChange();render()">\u2715</button></div>' +
+    body + '</div>';
 }
 
 
@@ -667,42 +885,28 @@ function renderColumnEditor(pi, si, ci, col) {
 //  SKILLS TAB
 // ================================================================
 function renderSkills() {
-  return `
-    <div class="sec-head">
-      <h2>Skills</h2>
-      <span class="count">${data.skills.length} categories</span>
-      <div style="flex:1"></div>
-      <button class="btn btn-primary" onclick="addSkillCategory()">+ New Category</button>
-    </div>
-    ${data.skills.map((cat, ci) => `
-      <div class="editor-card" data-draggable data-idx="${ci}" data-list="skills">
-        <div class="card-header" onclick="toggleCard(this)">
-          <div class="drag-handle">⠿</div>
-          <span class="card-title">${esc(cat.category)}</span>
-          <span class="card-subtitle">${cat.items.length} items</span>
-          <span class="card-chevron">▸</span>
-        </div>
-        <div class="card-body">
-          <div class="field">
-            <label>Category Name</label>
-            <input value="${esc(cat.category)}" oninput="data.skills[${ci}].category=this.value;updateCardTitle(this,${ci})"/>
-          </div>
-          ${cat.items.map((s, si) => `
-            <div class="skill-row" data-draggable data-idx="${si}" data-list="skills.${ci}.items">
-              <div class="drag-handle">⠿</div>
-              <input class="skill-name-input" value="${esc(s.name)}" oninput="data.skills[${ci}].items[${si}].name=this.value"/>
-              <input type="range" class="skill-slider" min="0" max="100" value="${s.pct}"
-                oninput="data.skills[${ci}].items[${si}].pct=parseInt(this.value);this.nextElementSibling.textContent=this.value+'%'"/>
-              <span class="skill-pct">${s.pct}%</span>
-              <button class="skill-remove" onclick="data.skills[${ci}].items.splice(${si},1);render()">✕</button>
-            </div>`).join("")}
-          <button class="btn btn-sm" onclick="data.skills[${ci}].items.push({name:'New Skill',pct:50});render()">+ Add Skill</button>
-        </div>
-        <div class="card-actions">
-          <div style="flex:1"></div>
-          <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete category?')){data.skills.splice(${ci},1);render();toast('Category deleted')}">Delete</button>
-        </div>
-      </div>`).join("")}`;
+  return '<div class="sec-head"><h2>Skills</h2><span class="badge">' + data.skills.length + ' categories</span><span class="spacer"></span>' +
+    '<button class="btn btn-primary" onclick="addSkillCat()">+ Category</button></div>' +
+    data.skills.map(function(cat, ci) {
+      return '<div class="e-card" data-draggable data-idx="' + ci + '" data-list="skills">' +
+        '<div class="e-card-head" onclick="toggleCard(this)"><div class="drag-handle">\u2807</div>' +
+        '<span class="e-card-title">' + esc(cat.category) + '</span>' +
+        '<span class="e-card-sub">' + cat.items.length + ' skills</span>' +
+        '<span class="chevron">\u25B8</span></div>' +
+        '<div class="e-card-body">' +
+        '<div class="field"><label>Category Name</label><input value="' + esc(cat.category) + '" oninput="data.skills[' + ci + '].category=this.value;onChange()"/></div>' +
+        cat.items.map(function(s, si) {
+          return '<div class="sk-row" data-draggable data-idx="' + si + '" data-list="skills.' + ci + '.items">' +
+            '<div class="drag-handle">\u2807</div>' +
+            '<input class="sk-name-input" value="' + esc(s.name) + '" oninput="data.skills[' + ci + '].items[' + si + '].name=this.value;onChange()"/>' +
+            '<input type="range" class="sk-slider" min="0" max="100" value="' + s.pct + '" oninput="data.skills[' + ci + '].items[' + si + '].pct=+this.value;this.nextElementSibling.textContent=this.value+\'%\';onChange()"/>' +
+            '<span class="sk-pct">' + s.pct + '%</span>' +
+            '<button class="sk-del" onclick="data.skills[' + ci + '].items.splice(' + si + ',1);onChange();render()">\u2715</button></div>';
+        }).join("") +
+        '<button class="btn btn-sm" onclick="data.skills[' + ci + '].items.push({name:\'New Skill\',pct:50});onChange();render()">+ Skill</button></div>' +
+        '<div class="e-card-foot"><span style="flex:1"></span>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="if(confirm(\'Delete?\')){data.skills.splice(' + ci + ',1);onChange();render()}">Delete</button></div></div>';
+    }).join("");
 }
 
 
@@ -710,47 +914,37 @@ function renderSkills() {
 //  ABOUT TAB
 // ================================================================
 function renderAbout() {
-  const a = data.about;
-  return `
-    <div class="sec-head"><h2>About</h2></div>
-
-    <h3 style="font-size:14px;margin-bottom:12px;">Bio Paragraphs</h3>
-    <div class="field-hint" style="margin-bottom:10px">Each entry becomes a paragraph. Drag to reorder.</div>
-    ${a.bio.map((p, i) => `
-      <div class="list-item" data-draggable data-idx="${i}" data-list="about.bio">
-        <div class="drag-handle">⠿</div>
-        <textarea oninput="data.about.bio[${i}]=this.value">${esc(p)}</textarea>
-        <button class="btn btn-sm btn-danger" onclick="data.about.bio.splice(${i},1);render()">✕</button>
-      </div>`).join("")}
-    <button class="btn btn-sm" onclick="data.about.bio.push('');render()">+ Add Paragraph</button>
-
-    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0"/>
-    <h3 style="font-size:14px;margin-bottom:12px;">Highlights</h3>
-    ${a.highlights.map((h, i) => `
-      <div class="list-item" data-draggable data-idx="${i}" data-list="about.highlights">
-        <div class="drag-handle">⠿</div>
-        <textarea rows="1" oninput="data.about.highlights[${i}]=this.value">${esc(h)}</textarea>
-        <button class="btn btn-sm btn-danger" onclick="data.about.highlights.splice(${i},1);render()">✕</button>
-      </div>`).join("")}
-    <button class="btn btn-sm" onclick="data.about.highlights.push('');render()">+ Add Highlight</button>
-
-    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0"/>
-    <h3 style="font-size:14px;margin-bottom:12px;">Education</h3>
-    ${a.education.map((e, i) => `
-      <div class="editor-card">
-        <div class="card-body open">
-          <div class="field-row">
-            <div class="field"><label>Degree / Program</label><input value="${esc(e.degree)}" oninput="data.about.education[${i}].degree=this.value"/></div>
-            <div class="field"><label>School</label><input value="${esc(e.school)}" oninput="data.about.education[${i}].school=this.value"/></div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label>Years</label><input value="${esc(e.years)}" oninput="data.about.education[${i}].years=this.value"/></div>
-          </div>
-          <div class="field"><label>Detail</label><textarea rows="2" oninput="data.about.education[${i}].detail=this.value">${esc(e.detail)}</textarea></div>
-          <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete?')){data.about.education.splice(${i},1);render()}">Delete</button>
-        </div>
-      </div>`).join("")}
-    <button class="btn btn-sm" onclick="data.about.education.push({degree:'',school:'',years:'',detail:''});render()">+ Add Education</button>`;
+  var a = data.about;
+  return '<div class="sec-head"><h2>About</h2></div>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:8px">Bio Paragraphs</h3>' +
+    '<div class="field-hint" style="margin-bottom:8px">Each entry = one paragraph. Drag to reorder.</div>' +
+    a.bio.map(function(p, i) {
+      return '<div class="list-item" data-draggable data-idx="' + i + '" data-list="about.bio">' +
+        '<div class="drag-handle">\u2807</div>' +
+        '<textarea oninput="data.about.bio[' + i + ']=this.value;onChange()">' + esc(p) + '</textarea>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="data.about.bio.splice(' + i + ',1);onChange();render()">\u2715</button></div>';
+    }).join("") +
+    '<button class="btn btn-sm" onclick="data.about.bio.push(\'\');onChange();render()">+ Paragraph</button>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:8px">Highlights</h3>' +
+    a.highlights.map(function(h, i) {
+      return '<div class="list-item" data-draggable data-idx="' + i + '" data-list="about.highlights">' +
+        '<div class="drag-handle">\u2807</div>' +
+        '<textarea rows="1" oninput="data.about.highlights[' + i + ']=this.value;onChange()">' + esc(h) + '</textarea>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="data.about.highlights.splice(' + i + ',1);onChange();render()">\u2715</button></div>';
+    }).join("") +
+    '<button class="btn btn-sm" onclick="data.about.highlights.push(\'\');onChange();render()">+ Highlight</button>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:8px">Education</h3>' +
+    a.education.map(function(e, i) {
+      return '<div class="e-card"><div class="e-card-body open">' +
+        '<div class="field-row"><div class="field"><label>Degree</label><input value="' + esc(e.degree) + '" oninput="data.about.education[' + i + '].degree=this.value;onChange()"/></div>' +
+        '<div class="field"><label>School</label><input value="' + esc(e.school) + '" oninput="data.about.education[' + i + '].school=this.value;onChange()"/></div></div>' +
+        '<div class="field"><label>Years</label><input value="' + esc(e.years) + '" oninput="data.about.education[' + i + '].years=this.value;onChange()" style="max-width:200px"/></div>' +
+        '<div class="field"><label>Detail</label><textarea rows="2" oninput="data.about.education[' + i + '].detail=this.value;onChange()">' + esc(e.detail) + '</textarea></div>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="if(confirm(\'Delete?\')){data.about.education.splice(' + i + ',1);onChange();render()}">Delete</button></div></div>';
+    }).join("") +
+    '<button class="btn btn-sm" onclick="data.about.education.push({degree:\'\',school:\'\',years:\'\',detail:\'\'});onChange();render()">+ Education</button>';
 }
 
 
@@ -758,33 +952,22 @@ function renderAbout() {
 //  CONTACT TAB
 // ================================================================
 function renderContact() {
-  const c = data.contact;
-  return `
-    <div class="sec-head"><h2>Contact</h2></div>
-    <div class="field"><label>Section Headline</label><input value="${esc(c.headline)}" oninput="data.contact.headline=this.value"/></div>
-    <div class="field"><label>Subtitle</label><input value="${esc(c.sub)}" oninput="data.contact.sub=this.value"/></div>
-
-    <h3 style="font-size:14px;margin:16px 0 12px;">Links</h3>
-    ${c.links.map((l, i) => `
-      <div class="editor-card">
-        <div class="card-body open">
-          <div class="field-row">
-            <div class="field"><label>Label</label><input value="${esc(l.label)}" oninput="data.contact.links[${i}].label=this.value"/></div>
-            <div class="field"><label>Handle / display text</label><input value="${esc(l.handle)}" oninput="data.contact.links[${i}].handle=this.value"/></div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label>URL</label><input value="${esc(l.href)}" oninput="data.contact.links[${i}].href=this.value"/></div>
-            <div class="field">
-              <label>Icon</label>
-              <select onchange="data.contact.links[${i}].icon=this.value">
-                ${["mail","github","linkedin","external"].map(ic => `<option${l.icon===ic?" selected":""}>${ic}</option>`).join("")}
-              </select>
-            </div>
-          </div>
-          <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete?')){data.contact.links.splice(${i},1);render()}">Delete</button>
-        </div>
-      </div>`).join("")}
-    <button class="btn btn-sm" onclick="data.contact.links.push({label:'',handle:'',href:'',icon:'external'});render()">+ Add Link</button>`;
+  var c = data.contact;
+  return '<div class="sec-head"><h2>Contact</h2></div>' +
+    '<div class="field"><label>Section Headline</label><input value="' + esc(c.headline) + '" oninput="data.contact.headline=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Subtitle</label><textarea rows="1" oninput="data.contact.sub=this.value;onChange()">' + esc(c.sub) + '</textarea></div>' +
+    '<h3 style="font-size:13px;font-weight:700;margin:14px 0 8px">Links</h3>' +
+    c.links.map(function(l, i) {
+      return '<div class="e-card"><div class="e-card-body open">' +
+        '<div class="field-row"><div class="field"><label>Label</label><input value="' + esc(l.label) + '" oninput="data.contact.links[' + i + '].label=this.value;onChange()"/></div>' +
+        '<div class="field"><label>Display text</label><input value="' + esc(l.handle) + '" oninput="data.contact.links[' + i + '].handle=this.value;onChange()"/></div></div>' +
+        '<div class="field-row"><div class="field"><label>URL</label><input value="' + esc(l.href) + '" oninput="data.contact.links[' + i + '].href=this.value;onChange()" style="font-family:var(--mono);font-size:11px"/></div>' +
+        '<div class="field"><label>Icon</label><select onchange="data.contact.links[' + i + '].icon=this.value;onChange()">' +
+        ["mail","github","linkedin","external"].map(function(ic) { return '<option' + (l.icon === ic ? " selected" : "") + '>' + ic + '</option>'; }).join("") +
+        '</select></div></div>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="if(confirm(\'Delete?\')){data.contact.links.splice(' + i + ',1);onChange();render()}">Delete</button></div></div>';
+    }).join("") +
+    '<button class="btn btn-sm" onclick="data.contact.links.push({label:\'\',handle:\'\',href:\'\',icon:\'external\'});onChange();render()">+ Link</button>';
 }
 
 
@@ -792,180 +975,259 @@ function renderContact() {
 //  META TAB
 // ================================================================
 function renderMeta() {
-  return `
-    <div class="sec-head"><h2>Site Meta</h2></div>
-    <div class="field"><label>Full Name</label><input value="${esc(data.name)}" oninput="data.name=this.value"/></div>
-    <div class="field"><label>Nav Brand</label><input value="${esc(data.brand)}" oninput="data.brand=this.value"/></div>
-    <div class="field"><label>Resume PDF path</label><input value="${esc(data.resume.file)}" oninput="data.resume.file=this.value"/></div>`;
+  return '<div class="sec-head"><h2>Settings</h2></div>' +
+    '<div class="field"><label>Full Name</label><input value="' + esc(data.name) + '" oninput="data.name=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Nav Brand</label><input value="' + esc(data.brand) + '" oninput="data.brand=this.value;onChange()" style="font-family:var(--mono)"/></div>' +
+    '<div class="field"><label>Resume PDF Path</label><input value="' + esc(data.resume.file) + '" oninput="data.resume.file=this.value;onChange()" style="font-family:var(--mono)"/></div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Danger Zone</h3>' +
+    '<button class="btn btn-danger" onclick="if(confirm(\'Clear draft from localStorage?\')){localStorage.removeItem(\'portfolio-draft\');markClean();toast(\'Draft cleared\')}">Clear Draft</button>' +
+    '<div class="field-hint" style="margin-top:6px">Removes the live-preview draft from browser storage. Your exported content.js is not affected.</div>';
 }
 
 
 // ================================================================
-//  PROJECT HELPERS
+//  DATA HELPERS
 // ================================================================
 function addProject() {
   data.projects.push({
-    id: "new-project-" + Date.now(),
-    title: "New Project",
-    subtitle: "",
-    status: "completed",
-    featured: false,
-    tags: [],
-    thumb: null,
-    video: null,
-    description: "",
-    detail: {
-      lede: "",
-      date: "",
-      demoVideo: null,
-      sections: [],
-      links: [],
-    },
+    id:"new-project-"+Date.now(), title:"New Project", subtitle:"", status:"completed",
+    featured:false, tags:[], thumb:null, video:null, description:"",
+    detail:{ lede:"", date:"", demoVideo:null, sections:[], links:[] }
   });
-  render();
-  toast("Project added — expand it to edit");
+  onChange(); render(); toast("Project added");
 }
-
 function duplicateProject(i) {
-  const copy = JSON.parse(JSON.stringify(data.projects[i]));
-  copy.id = copy.id + "-copy";
-  copy.title = copy.title + " (copy)";
-  data.projects.splice(i + 1, 0, copy);
-  render();
-  toast("Project duplicated");
+  var c = JSON.parse(JSON.stringify(data.projects[i]));
+  c.id += "-copy"; c.title += " (copy)";
+  data.projects.splice(i+1, 0, c);
+  onChange(); render(); toast("Duplicated");
 }
-
 function ensureDetail(i) {
-  if (!data.projects[i].detail) {
-    data.projects[i].detail = { lede: "", date: "", demoVideo: null, sections: [], links: [] };
-  }
+  if (!data.projects[i].detail) data.projects[i].detail = { lede:"", date:"", demoVideo:null, sections:[], links:[] };
 }
-
 function setDemoVideo(i, val) {
   ensureDetail(i);
-  if (val) {
-    data.projects[i].detail.demoVideo = { src: val, poster: data.projects[i].thumb || "" };
-  } else {
-    data.projects[i].detail.demoVideo = null;
-  }
+  data.projects[i].detail.demoVideo = val ? { src:val, poster:data.projects[i].thumb||"" } : null;
 }
-
 function addTag(i, tag) {
   tag = tag.trim();
   if (tag && !data.projects[i].tags.includes(tag)) {
     data.projects[i].tags.push(tag);
+    onChange();
+    // Refocus the tag input inside the same project card after render
+    focusAfterRender = '[data-list="projects"][data-idx="' + i + '"] .tag-input';
     render();
   }
 }
+function addSection(pi, layout) { ensureDetail(pi); data.projects[pi].detail.sections.push({ layout:layout, columns:[{title:"",text:""}] }); render(); }
+function addColumn(pi, si) { data.projects[pi].detail.sections[si].columns.push({title:"",text:""}); render(); }
+function switchColText(pi, si, ci) { var c = data.projects[pi].detail.sections[si].columns[ci]; delete c.items; c.text = c.text||""; onChange(); render(); }
+function switchColList(pi, si, ci) { var c = data.projects[pi].detail.sections[si].columns[ci]; delete c.text; c.items = c.items||[""]; onChange(); render(); }
+function addSkillCat() { data.skills.push({category:"New Category",items:[{name:"New Skill",pct:50}]}); onChange(); render(); toast("Category added"); }
 
-function addSection(pi, layout) {
-  ensureDetail(pi);
-  data.projects[pi].detail.sections.push({
-    layout: layout,
-    columns: [{ title: "", text: "" }],
-  });
-  render();
-}
-
-function addColumn(pi, si) {
-  data.projects[pi].detail.sections[si].columns.push({ title: "", text: "" });
-  render();
-}
-
-function switchColToText(pi, si, ci) {
-  const col = data.projects[pi].detail.sections[si].columns[ci];
-  delete col.items;
-  col.text = col.text || "";
-  render();
-}
-
-function switchColToList(pi, si, ci) {
-  const col = data.projects[pi].detail.sections[si].columns[ci];
-  delete col.text;
-  col.items = col.items || [""];
-  render();
-}
-
-function addSkillCategory() {
-  data.skills.push({ category: "New Category", items: [{ name: "New Skill", pct: 50 }] });
-  render();
-  toast("Category added");
+function toggleCard(head) {
+  var body = head.nextElementSibling;
+  var chev = head.querySelector(".chevron");
+  var card = head.closest("[data-draggable]");
+  var isOpen = body.classList.toggle("open");
+  if (chev) chev.classList.toggle("open", isOpen);
+  if (card) {
+    var key = card.dataset.list + "-" + card.dataset.idx;
+    if (isOpen) openCards.add(key); else openCards.delete(key);
+  }
 }
 
 
 // ================================================================
-//  UI HELPERS
+//  SYMBOL PICKER
 // ================================================================
-function toggleCard(header) {
-  const body = header.nextElementSibling;
-  const chevron = header.querySelector(".card-chevron");
-  body.classList.toggle("open");
-  chevron.classList.toggle("open");
+var SYMBOLS = {
+  "Common":      "\u2192 \u2190 \u2191 \u2193 \u21D2 \u21D0 \u2022 \u25B9 \u25B8 \u25AA \u2605 \u2606 \u2713 \u2715 \u2717 \u2714 \u26A1 \u2699 \u2666 \u25C6 \u25C7 \u25CB \u25CF \u25C9 \u25CE \u25A1 \u25A0 \u25B3 \u25B2 \u25BD \u25BC".split(" "),
+  "Tech":        "\u2318 \u2325 \u2303 \u21E7 \u232B \u23CE \u2328 \u238B \u27E8 \u27E9 \u27EA \u27EB \u00AB \u00BB \u2039 \u203A \u27F5 \u27F6 \u27F7 \u2295 \u2296 \u2297 \u2298 \u221E \u2205 \u2208 \u2209 \u2282 \u2283".split(" "),
+  "Math":        "\u00D7 \u00F7 \u00B1 \u2213 \u2248 \u2260 \u2264 \u2265 \u2211 \u220F \u221A \u222B \u2202 \u2206 \u2207 \u00B0 \u2032 \u2033 \u2030 \u2070 \u00B9 \u00B2 \u00B3 \u2074 \u2075 \u207F \u2080 \u2081 \u2082 \u2083".split(" "),
+  "Arrows":      "\u27F9 \u27F8 \u27FA \u2194 \u2195 \u2197 \u2198 \u2199 \u2196 \u2934 \u2935 \u21A9 \u21AA \u21C4 \u21C5 \u21C6 \u21C7 \u21C8 \u21C9 \u21CA \u279C \u27A4 \u2794 \u279E \u2B95 \u2B05 \u2B06 \u2B07 \u2B08 \u2B09".split(" "),
+  "Emoji":       "\uD83C\uDFAE \uD83D\uDD79 \uD83C\uDFAF \uD83C\uDFA8 \uD83D\uDD25 \uD83D\uDCA1 \uD83D\uDE80 \u2B50 \uD83D\uDCBB \uD83D\uDDA5 \uD83D\uDCF1 \uD83E\uDDE0 \uD83E\uDD16 \uD83D\uDEE0 \uD83D\uDCE6 \uD83D\uDCCA \uD83C\uDFC6 \uD83C\uDF93 \uD83D\uDCC4 \uD83D\uDD17 \uD83C\uDF10 \uD83D\uDCAC \uD83D\uDCCC \uD83D\uDCD0 \uD83E\uDDEA \uD83E\uDDE9 \uD83C\uDFD7 \uD83D\uDD27 \uD83C\uDFB2 \uD83D\uDD50".split(" "),
+  "Punctuation": "\u2014 \u2013 \u2026 \u00B7 \u2022 \u2023 \u2043 \u203B \u00A7 \u00B6 \u2020 \u2021 \u2122 \u00A9 \u00AE \u2120 \u2103 \u2109 \u2116 \u2113 \u203D \u2042 \u2767 \u2619 \u273D \u273B \u2756 \u2726 \u2727 \u2729".split(" "),
+};
+var symCat = Object.keys(SYMBOLS)[0];
+var lastFocusedInput = null;
+
+document.addEventListener("focusin", function(e) {
+  if (e.target.matches("input,textarea")) lastFocusedInput = e.target;
+});
+
+function openSymbolPicker() {
+  document.getElementById("sym-modal").classList.add("open");
+  renderSymbols();
+}
+function closeSymbolPicker() {
+  document.getElementById("sym-modal").classList.remove("open");
+}
+function renderSymbols() {
+  document.getElementById("sym-tabs").innerHTML = Object.keys(SYMBOLS).map(function(c) {
+    return '<button class="sym-tab' + (c === symCat ? " active" : "") + '" onclick="symCat=\'' + c + '\';renderSymbols()">' + c + '</button>';
+  }).join("");
+  document.getElementById("sym-grid").innerHTML = SYMBOLS[symCat].map(function(s) {
+    return '<button class="sym-btn" onclick="insertSymbol(\'' + s + '\')" title="' + s + '">' + s + '</button>';
+  }).join("");
+}
+function insertSymbol(sym) {
+  if (!lastFocusedInput) { toast("Click a text field first", "error"); return; }
+  var el = lastFocusedInput;
+  var s = el.selectionStart, e = el.selectionEnd;
+  el.value = el.value.slice(0, s) + sym + el.value.slice(e);
+  el.selectionStart = el.selectionEnd = s + sym.length;
+  el.focus();
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  closeSymbolPicker();
 }
 
-function updateCardTitle(input, idx) {
-  const header = input.closest(".card-body").previousElementSibling;
-  const title = header.querySelector(".card-title");
-  if (title) title.textContent = input.value;
+
+// ================================================================
+//  LIVE PREVIEW
+// ================================================================
+function refreshPreview() {
+  if (!previewVisible) return;
+  var frame = document.getElementById("preview-frame");
+  var pageSel = document.getElementById("preview-page");
+  var projSel = document.getElementById("preview-project");
+  var url = pageSel.value;
+
+  if (url.indexOf("project.html") >= 0) {
+    projSel.style.display = "";
+    projSel.innerHTML = data.projects.map(function(p) {
+      return '<option value="' + esc(p.id) + '">' + esc(p.title) + '</option>';
+    }).join("");
+    url = "project.html?draft=1&id=" + projSel.value;
+  } else {
+    projSel.style.display = "none";
+  }
+
+  document.getElementById("preview-url").textContent = url;
+  localStorage.setItem("portfolio-draft", JSON.stringify(data));
+
+  var scrollY = 0;
+  try { scrollY = frame.contentWindow ? frame.contentWindow.scrollY : 0; } catch(e) {}
+  frame.onload = function() {
+    try { frame.contentWindow.scrollTo(0, scrollY); } catch(e) {}
+    frame.onload = null;
+  };
+  frame.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "_t=" + Date.now();
+}
+
+function previewProject(id) {
+  var pageSel = document.getElementById("preview-page");
+  pageSel.value = "project.html?draft=1&id=";
+  var projSel = document.getElementById("preview-project");
+  projSel.style.display = "";
+  projSel.innerHTML = data.projects.map(function(p) {
+    return '<option value="' + esc(p.id) + '"' + (p.id === id ? " selected" : "") + '>' + esc(p.title) + '</option>';
+  }).join("");
+  if (!previewVisible) togglePreview();
+  refreshPreview();
+}
+
+function togglePreview() {
+  previewVisible = !previewVisible;
+  document.getElementById("split-preview").classList.toggle("hidden", !previewVisible);
+  document.getElementById("split-handle").style.display = previewVisible ? "" : "none";
+  document.getElementById("btn-preview-toggle").classList.toggle("active", previewVisible);
+  if (previewVisible) refreshPreview();
 }
 
 
 // ================================================================
-//  IMPORT / EXPORT
+//  SPLIT PANE RESIZER
 // ================================================================
-function exportFile() {
-  const clean = JSON.parse(JSON.stringify(data));
-  // Remove undefined/null optional fields to keep it tidy
-  clean.projects.forEach(p => {
-    if (!p.thumb) p.thumb = null;
-    if (!p.video) p.video = null;
-  });
+var splitHandle = document.getElementById("split-handle");
+splitHandle.addEventListener("mousedown", function(e) {
+  e.preventDefault();
+  var preview = document.getElementById("split-preview");
+  var startX = e.clientX;
+  var startW = preview.offsetWidth;
+  splitHandle.classList.add("dragging");
+  function onMove(ev) { preview.style.width = Math.max(200, startW + (startX - ev.clientX)) + "px"; }
+  function onUp() { splitHandle.classList.remove("dragging"); document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); }
+  document.addEventListener("mousemove", onMove);
+  document.addEventListener("mouseup", onUp);
+});
 
-  let js = "// ================================================================\n";
+
+// ================================================================
+//  FILE SAVE / IMPORT
+// ================================================================
+function generateJS() {
+  var js = "// ================================================================\n";
   js += "//\n";
-  js += "//  content.js — Single source of truth for the entire portfolio.\n";
+  js += "//  content.js \u2014 Single source of truth for the entire portfolio.\n";
   js += "//\n";
   js += "//  To update the site, edit the data below. No HTML changes needed.\n";
   js += "//  Adding a new project = add one object to SITE.projects. That's it.\n";
   js += "//\n";
   js += "// ================================================================\n\n";
-  js += "const SITE = " + JSON.stringify(clean, null, 2) + ";\n";
+  js += "const SITE = " + JSON.stringify(data, null, 2) + ";\n\n";
+  js += "// Live-preview support \u2014 when opened via editor.html the iframe adds ?draft=1\n";
+  js += "// so the page reads the editor's in-progress data from localStorage.\n";
+  js += "// On the published site this never triggers (no query param, no localStorage).\n";
+  js += "try {\n";
+  js += '  if (new URLSearchParams(window.location.search).has("draft")) {\n';
+  js += '    const _d = localStorage.getItem("portfolio-draft");\n';
+  js += '    if (_d) { const _p = JSON.parse(_d); for (const _k in _p) SITE[_k] = _p[_k]; }\n';
+  js += "  }\n";
+  js += "} catch (_e) { /* silently ignore */ }\n";
+  return js;
+}
 
-  const blob = new Blob([js], { type: "application/javascript" });
-  const a = document.createElement("a");
+async function saveFile() {
+  if ("showSaveFilePicker" in window) {
+    try {
+      if (!fileHandle) {
+        fileHandle = await window.showSaveFilePicker({
+          suggestedName: "content.js",
+          types: [{ description: "JavaScript", accept: { "application/javascript": [".js"] } }],
+        });
+      }
+      var writable = await fileHandle.createWritable();
+      await writable.write(generateJS());
+      await writable.close();
+      markClean();
+      toast("Saved to file!");
+      return;
+    } catch (e) {
+      if (e.name === "AbortError") return;
+      fileHandle = null;
+    }
+  }
+  var blob = new Blob([generateJS()], { type: "application/javascript" });
+  var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "content.js";
   a.click();
   URL.revokeObjectURL(a.href);
-  toast("content.js downloaded — replace the file in your project folder");
+  markClean();
+  toast("Downloaded \u2014 replace content.js in your project");
 }
 
 function importFile() {
-  const input = document.getElementById("file-input");
-  input.onchange = () => {
-    const file = input.files[0];
+  var input = document.getElementById("file-input");
+  input.onchange = function() {
+    var file = input.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
+    var reader = new FileReader();
+    reader.onload = function() {
       try {
-        // Extract JSON from content.js
-        const text = reader.result;
-        const match = text.match(/const\s+SITE\s*=\s*(\{[\s\S]*\});?\s*$/);
-        if (match) {
-          // Evaluate as JSON (safer: use Function constructor)
-          const fn = new Function("return " + match[1]);
-          data = fn();
-          render();
-          toast("Imported successfully!");
-        } else {
-          // Try evaluating the whole file
-          const fn2 = new Function(text + "; return SITE;");
-          data = fn2();
-          render();
-          toast("Imported successfully!");
-        }
+        var text = reader.result;
+        var fn = new Function(text + "; return SITE;");
+        data = JSON.parse(JSON.stringify(fn()));
+        history = [JSON.stringify(data)];
+        historyIdx = 0;
+        updateUndoRedo();
+        onChange();
+        render();
+        toast("Imported!");
       } catch (e) {
-        toast("Import failed: " + e.message);
+        toast("Import failed: " + e.message, "error");
       }
     };
     reader.readAsText(file);
@@ -974,15 +1236,37 @@ function importFile() {
   input.click();
 }
 
-function previewSite() {
-  window.open("index.html", "_blank");
-}
+
+// ================================================================
+//  KEYBOARD SHORTCUTS
+// ================================================================
+document.addEventListener("keydown", function(e) {
+  var mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key === "s") { e.preventDefault(); saveFile(); }
+  if (mod && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+  if (mod && (e.key === "y" || (e.key === "z" && e.shiftKey))) { e.preventDefault(); redo(); }
+  if (e.key === "Escape") closeSymbolPicker();
+});
 
 
 // ================================================================
 //  INIT
 // ================================================================
+var savedDraft = localStorage.getItem("portfolio-draft");
+if (savedDraft) {
+  try {
+    data = JSON.parse(savedDraft);
+    history = [JSON.stringify(data)];
+  } catch(e) {}
+}
+
 render();
+refreshPreview();
+
+var projSel2 = document.getElementById("preview-project");
+projSel2.innerHTML = data.projects.map(function(p) {
+  return '<option value="' + esc(p.id) + '">' + esc(p.title) + '</option>';
+}).join("");
 </script>
 </body>
 </html>

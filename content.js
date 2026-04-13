@@ -395,3 +395,13 @@ const SITE = {
     }
   ]
 };
+
+// Live-preview support — when opened via editor.html the iframe adds ?draft=1
+// so the page reads the editor's in-progress data from localStorage.
+// On the published site this never triggers (no query param, no localStorage).
+try {
+  if (new URLSearchParams(window.location.search).has("draft")) {
+    const _d = localStorage.getItem("portfolio-draft");
+    if (_d) { const _p = JSON.parse(_d); for (const _k in _p) SITE[_k] = _p[_k]; }
+  }
+} catch (_e) { /* silently ignore */ }
