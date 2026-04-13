@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portfolio Editor</title>
+<style>
+/* ================================================================
+   DESIGN TOKENS
+   ================================================================ */
+:root {
+  --bg: #111218;
+  --surface: #1a1b24;
+  --card: #22232e;
+  --border: #2e3040;
+  --fg: #e0e2ea;
+  --muted: #7a7f96;
+  --primary: #2dd4bf;
+  --primary-dim: rgba(45,212,191,.12);
+  --accent: #a78bfa;
+  --danger: #f87171;
+  --danger-dim: rgba(248,113,113,.12);
+  --radius: 8px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font);
+  font-size: 14px; line-height: 1.5; overflow: hidden;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
+a { color: var(--primary); text-decoration: none; }
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Top bar */
+.toolbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 20px; height: 56px; min-height: 56px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.toolbar-title {
+  font-size: 15px; font-weight: 700; color: var(--primary);
+  font-family: var(--mono); letter-spacing: .04em;
+}
+.toolbar-title span { color: var(--muted); font-weight: 400; }
+.toolbar-spacer { flex: 1; }
+
+/* Body = sidebar + main */
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+.sidebar {
+  width: 200px; min-width: 200px;
+  background: var(--surface); border-right: 1px solid var(--border);
+  padding: 12px 0; display: flex; flex-direction: column;
+}
+.sidebar-section {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  color: var(--muted); padding: 16px 20px 6px; text-transform: uppercase;
+}
+.sidebar a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px; color: var(--muted); font-weight: 500;
+  border-left: 2px solid transparent; transition: all .12s;
+  cursor: pointer;
+}
+.sidebar a:hover { color: var(--fg); background: var(--primary-dim); }
+.sidebar a.active {
+  color: var(--primary); border-left-color: var(--primary);
+  background: var(--primary-dim);
+}
+.sidebar a svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Main */
+.main {
+  flex: 1; overflow-y: auto; padding: 28px 32px 60px;
+}
+
+/* ================================================================
+   COMMON COMPONENTS
+   ================================================================ */
+
+/* Section header */
+.sec-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+}
+.sec-head h2 { font-size: 18px; font-weight: 700; }
+.sec-head .count {
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  background: var(--card); padding: 2px 10px; border-radius: 99px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--card); color: var(--fg); font-weight: 600;
+  cursor: pointer; transition: all .12s; font-size: 13px;
+}
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn svg { width: 14px; height: 14px; }
+.btn-primary {
+  background: var(--primary); border-color: var(--primary);
+  color: var(--bg); font-weight: 700;
+}
+.btn-primary:hover { background: #3ee8d1; }
+.btn-danger { color: var(--danger); }
+.btn-danger:hover { background: var(--danger-dim); border-color: var(--danger); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* Form fields */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; color: var(--muted); margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.field input, .field textarea, .field select {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--fg); outline: none; transition: border-color .15s;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--primary);
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field select { cursor: pointer; }
+.field-row { display: flex; gap: 12px; }
+.field-row .field { flex: 1; }
+.field-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* Toggle */
+.toggle-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.toggle {
+  width: 36px; height: 20px; border-radius: 10px;
+  background: var(--border); position: relative; cursor: pointer;
+  transition: background .15s; border: none;
+}
+.toggle.on { background: var(--primary); }
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--fg); transition: transform .15s;
+}
+.toggle.on::after { transform: translateX(16px); }
+.toggle-label { font-size: 13px; }
+
+/* Cards */
+.editor-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px;
+  transition: border-color .15s;
+}
+.editor-card:hover { border-color: #3a3c50; }
+.editor-card.dragging { opacity: .4; }
+.editor-card.drag-over { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; cursor: pointer; user-select: none;
+}
+.drag-handle {
+  cursor: grab; color: var(--muted); flex-shrink: 0; font-size: 14px;
+  display: flex; align-items: center;
+}
+.drag-handle:active { cursor: grabbing; }
+.card-title { font-weight: 600; flex: 1; }
+.card-subtitle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.card-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 3px; letter-spacing: .04em;
+}
+.card-badge.completed { background: rgba(45,212,191,.15); color: var(--primary); }
+.card-badge.ongoing   { background: rgba(167,139,250,.15); color: var(--accent); }
+.card-chevron {
+  color: var(--muted); transition: transform .15s; flex-shrink: 0;
+}
+.card-chevron.open { transform: rotate(90deg); }
+.card-body { padding: 0 16px 16px; display: none; }
+.card-body.open { display: block; }
+.card-actions {
+  display: flex; gap: 8px; padding: 8px 16px; border-top: 1px solid var(--border);
+}
+
+/* Tag editor */
+.tag-editor { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tag-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 3px; padding: 3px 8px;
+  font-family: var(--mono); font-size: 11px; color: var(--primary);
+}
+.tag-pill button {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 14px; line-height: 1; padding: 0 0 0 2px;
+}
+.tag-pill button:hover { color: var(--danger); }
+.tag-input {
+  background: none; border: none; color: var(--fg); outline: none;
+  font-family: var(--mono); font-size: 11px; width: 80px;
+}
+
+/* Skill slider */
+.skill-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  padding: 6px 0;
+}
+.skill-row .drag-handle { margin-right: -4px; }
+.skill-name-input {
+  flex: 1; background: transparent; border: 1px solid transparent;
+  color: var(--fg); padding: 4px 8px; border-radius: 4px;
+  font-size: 13px;
+}
+.skill-name-input:focus { border-color: var(--border); background: var(--bg); }
+.skill-slider {
+  -webkit-appearance: none; width: 120px; height: 4px;
+  background: var(--border); border-radius: 2px; outline: none;
+}
+.skill-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--primary); cursor: pointer;
+}
+.skill-pct {
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  width: 36px; text-align: right;
+}
+.skill-remove {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 16px; padding: 0 4px;
+}
+.skill-remove:hover { color: var(--danger); }
+
+/* List editor (for bio paragraphs, highlights, roles, etc.) */
+.list-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  margin-bottom: 8px; padding: 8px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.list-item .drag-handle { margin-top: 4px; }
+.list-item textarea {
+  flex: 1; background: transparent; border: none; color: var(--fg);
+  resize: vertical; min-height: 36px; outline: none; padding: 4px;
+  font-size: 13px; line-height: 1.5;
+}
+.list-item textarea:focus { background: var(--surface); border-radius: 4px; }
+.list-item .btn-danger { align-self: flex-start; margin-top: 2px; }
+
+/* Detail section builder */
+.section-block {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; margin-bottom: 10px;
+}
+.section-block-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.section-block-header .drag-handle { cursor: grab; }
+.section-cols { display: flex; gap: 12px; }
+.section-cols.two-col > * { flex: 1; }
+.section-col {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--primary); color: var(--bg);
+  padding: 12px 20px; border-radius: var(--radius);
+  font-weight: 600; font-size: 13px;
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s ease; z-index: 999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 48px 20px; color: var(--muted);
+}
+.empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: .3; }
+.empty-state p { margin-bottom: 16px; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .sidebar { width: 56px; min-width: 56px; }
+  .sidebar a span { display: none; }
+  .sidebar-section { display: none; }
+  .sidebar a { padding: 12px 0; justify-content: center; }
+  .main { padding: 20px 16px 60px; }
+  .field-row { flex-direction: column; gap: 0; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- TOOLBAR -->
+  <header class="toolbar">
+    <div class="toolbar-title">&lt;TB/&gt; <span>Portfolio Editor</span></div>
+    <div class="toolbar-spacer"></div>
+    <button class="btn" onclick="previewSite()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Preview
+    </button>
+    <button class="btn" onclick="importFile()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import
+    </button>
+    <button class="btn btn-primary" onclick="exportFile()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export content.js
+    </button>
+  </header>
+
+  <div class="body">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-section">Content</div>
+      <a class="active" data-tab="hero" onclick="switchTab('hero')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Hero</span>
+      </a>
+      <a data-tab="projects" onclick="switchTab('projects')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Projects</span>
+      </a>
+      <a data-tab="skills" onclick="switchTab('skills')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span>Skills</span>
+      </a>
+      <a data-tab="about" onclick="switchTab('about')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>About</span>
+      </a>
+      <a data-tab="contact" onclick="switchTab('contact')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Contact</span>
+      </a>
+      <div class="sidebar-section">Settings</div>
+      <a data-tab="meta" onclick="switchTab('meta')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Site Meta</span>
+      </a>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main" id="main"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="file-input" accept=".js" style="display:none"/>
+
+<script src="content.js"></script>
+<script>
+// ================================================================
+//  STATE — deep-clone SITE so we can mutate freely
+// ================================================================
+let data = JSON.parse(JSON.stringify(SITE));
+let currentTab = "hero";
+
+// ================================================================
+//  HELPERS
+// ================================================================
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".sidebar a").forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
+  render();
+}
+
+function render() {
+  const m = document.getElementById("main");
+  switch (currentTab) {
+    case "hero":     m.innerHTML = renderHero(); break;
+    case "projects": m.innerHTML = renderProjects(); break;
+    case "skills":   m.innerHTML = renderSkills(); break;
+    case "about":    m.innerHTML = renderAbout(); break;
+    case "contact":  m.innerHTML = renderContact(); break;
+    case "meta":     m.innerHTML = renderMeta(); break;
+  }
+  bindDragDrop();
+}
+
+// ================================================================
+//  DRAG & DROP
+// ================================================================
+let dragSrcIdx = null;
+let dragListKey = null;
+
+function bindDragDrop() {
+  document.querySelectorAll("[data-draggable]").forEach(card => {
+    card.setAttribute("draggable", "true");
+    card.addEventListener("dragstart", e => {
+      dragSrcIdx = parseInt(card.dataset.idx);
+      dragListKey = card.dataset.list;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+    card.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; card.classList.add("drag-over"); });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      const targetIdx = parseInt(card.dataset.idx);
+      if (dragListKey === card.dataset.list && dragSrcIdx !== targetIdx) {
+        const arr = getListByKey(dragListKey);
+        const item = arr.splice(dragSrcIdx, 1)[0];
+        arr.splice(targetIdx, 0, item);
+        render();
+        toast("Reordered!");
+      }
+    });
+  });
+}
+
+function getListByKey(key) {
+  const parts = key.split(".");
+  let obj = data;
+  for (const p of parts) {
+    if (/^\d+$/.test(p)) obj = obj[parseInt(p)];
+    else obj = obj[p];
+  }
+  return obj;
+}
+
+
+// ================================================================
+//  HERO TAB
+// ================================================================
+function renderHero() {
+  const h = data.hero;
+  return `
+    <div class="sec-head"><h2>Hero Section</h2></div>
+
+    <div class="field">
+      <label>Label (small text above name)</label>
+      <input value="${esc(h.label)}" oninput="data.hero.label=this.value"/>
+    </div>
+
+    <div class="field">
+      <label>Bio</label>
+      <textarea rows="3" oninput="data.hero.bio=this.value">${esc(h.bio)}</textarea>
+    </div>
+
+    <div class="field">
+      <label>Cycling Roles</label>
+      <div class="field-hint">These cycle in the hero with a typing animation. Drag to reorder.</div>
+    </div>
+    ${h.roles.map((r, i) => `
+      <div class="list-item" data-draggable data-idx="${i}" data-list="hero.roles">
+        <div class="drag-handle">⠿</div>
+        <textarea rows="1" oninput="data.hero.roles[${i}]=this.value">${esc(r)}</textarea>
+        <button class="btn btn-sm btn-danger" onclick="data.hero.roles.splice(${i},1);render()">✕</button>
+      </div>`).join("")}
+    <button class="btn btn-sm" onclick="data.hero.roles.push('New Role');render()">+ Add Role</button>`;
+}
+
+
+// ================================================================
+//  PROJECTS TAB
+// ================================================================
+function renderProjects() {
+  return `
+    <div class="sec-head">
+      <h2>Projects</h2>
+      <span class="count">${data.projects.length}</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary" onclick="addProject()">+ New Project</button>
+    </div>
+    ${data.projects.map((p, i) => renderProjectCard(p, i)).join("")}`;
+}
+
+function renderProjectCard(p, i) {
+  const d = p.detail || {};
+  const sections = d.sections || [];
+  return `
+    <div class="editor-card" data-draggable data-idx="${i}" data-list="projects">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div class="drag-handle">⠿</div>
+        ${p.thumb ? `<img src="${esc(p.thumb)}" style="width:48px;height:28px;object-fit:cover;border-radius:4px;"/>` : ""}
+        <span class="card-title">${esc(p.title || "Untitled")}</span>
+        <span class="card-subtitle">${esc(p.subtitle || "")}</span>
+        <span class="card-badge ${p.status}">${esc(p.status)}</span>
+        <span class="card-chevron">▸</span>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field"><label>Title</label><input value="${esc(p.title)}" oninput="data.projects[${i}].title=this.value;updateCardTitle(this,${i})"/></div>
+          <div class="field"><label>Subtitle</label><input value="${esc(p.subtitle)}" oninput="data.projects[${i}].subtitle=this.value"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>ID (URL slug)</label><input value="${esc(p.id)}" oninput="data.projects[${i}].id=this.value"/></div>
+          <div class="field">
+            <label>Status</label>
+            <select onchange="data.projects[${i}].status=this.value;render()">
+              <option value="completed"${p.status === "completed" ? " selected" : ""}>Completed</option>
+              <option value="ongoing"${p.status === "ongoing" ? " selected" : ""}>Ongoing</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Thumbnail path</label><input value="${esc(p.thumb || "")}" oninput="data.projects[${i}].thumb=this.value||null" placeholder="assets/my-thumb.png"/></div>
+          <div class="field"><label>Hover video path</label><input value="${esc(p.video || "")}" oninput="data.projects[${i}].video=this.value||null" placeholder="assets/my-demo.mp4"/></div>
+        </div>
+        <div class="field">
+          <label>Card Description</label>
+          <textarea rows="2" oninput="data.projects[${i}].description=this.value">${esc(p.description)}</textarea>
+        </div>
+
+        <div class="field">
+          <label>Tags</label>
+          <div class="tag-editor" id="tags-${i}">
+            ${p.tags.map((t, ti) => `<span class="tag-pill">${esc(t)}<button onclick="data.projects[${i}].tags.splice(${ti},1);render()">×</button></span>`).join("")}
+            <input class="tag-input" placeholder="+ tag" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag(${i},this.value);this.value=''}"/>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <button class="toggle${p.featured ? " on" : ""}" onclick="data.projects[${i}].featured=!data.projects[${i}].featured;this.classList.toggle('on')"></button>
+          <span class="toggle-label">Featured on home page</span>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>
+        <h3 style="font-size:14px;margin-bottom:12px;color:var(--primary);">Detail Page</h3>
+
+        <div class="field">
+          <label>Lede (detail hero paragraph)</label>
+          <textarea rows="2" oninput="ensureDetail(${i});data.projects[${i}].detail.lede=this.value">${esc(d.lede || "")}</textarea>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Date</label><input value="${esc(d.date || "")}" oninput="ensureDetail(${i});data.projects[${i}].detail.date=this.value"/></div>
+          <div class="field"><label>Demo video src</label><input value="${esc(d.demoVideo?.src || "")}" oninput="setDemoVideo(${i},this.value)"/></div>
+        </div>
+
+        <div class="field"><label>Content Sections</label></div>
+        ${sections.map((sec, si) => renderSectionBlock(i, si, sec)).join("")}
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button class="btn btn-sm" onclick="addSection(${i},'single')">+ Single Section</button>
+          <button class="btn btn-sm" onclick="addSection(${i},'two-col')">+ Two-Column Section</button>
+        </div>
+
+        <div class="field"><label>Detail Page Links</label></div>
+        ${(d.links || []).map((l, li) => `
+          <div class="list-item">
+            <input style="flex:1" value="${esc(l.label)}" placeholder="Label" oninput="data.projects[${i}].detail.links[${li}].label=this.value"/>
+            <input style="flex:2" value="${esc(l.url)}" placeholder="URL" oninput="data.projects[${i}].detail.links[${li}].url=this.value"/>
+            <select style="width:90px" onchange="data.projects[${i}].detail.links[${li}].icon=this.value">
+              ${["github","external","arrow"].map(ic => `<option${l.icon===ic?" selected":""}>${ic}</option>`).join("")}
+            </select>
+            <button class="btn btn-sm btn-danger" onclick="data.projects[${i}].detail.links.splice(${li},1);render()">✕</button>
+          </div>`).join("")}
+        <button class="btn btn-sm" onclick="ensureDetail(${i});data.projects[${i}].detail.links.push({label:'',url:'',icon:'github'});render()">+ Add Link</button>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-sm" onclick="duplicateProject(${i})">Duplicate</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete this project?')){data.projects.splice(${i},1);render();toast('Project deleted')}">Delete</button>
+      </div>
+    </div>`;
+}
+
+function renderSectionBlock(pi, si, sec) {
+  const cols = sec.columns || [];
+  return `
+    <div class="section-block" data-draggable data-idx="${si}" data-list="projects.${pi}.detail.sections">
+      <div class="section-block-header">
+        <div class="drag-handle">⠿</div>
+        <select style="width:120px" onchange="data.projects[${pi}].detail.sections[${si}].layout=this.value;render()">
+          <option value="single"${sec.layout==="single"?" selected":""}>Single</option>
+          <option value="two-col"${sec.layout==="two-col"?" selected":""}>Two Column</option>
+        </select>
+        <div style="flex:1"></div>
+        <button class="btn btn-sm" onclick="addColumn(${pi},${si})">+ Column</button>
+        <button class="btn btn-sm btn-danger" onclick="data.projects[${pi}].detail.sections.splice(${si},1);render()">✕</button>
+      </div>
+      <div class="section-cols${sec.layout==="two-col"?" two-col":""}">
+        ${cols.map((col, ci) => renderColumnEditor(pi, si, ci, col)).join("")}
+      </div>
+    </div>`;
+}
+
+function renderColumnEditor(pi, si, ci, col) {
+  const hasItems = Array.isArray(col.items);
+  return `
+    <div class="section-col">
+      <div class="field">
+        <label>Title</label>
+        <input value="${esc(col.title || "")}" oninput="data.projects[${pi}].detail.sections[${si}].columns[${ci}].title=this.value"/>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button class="btn btn-sm${!hasItems?" btn-primary":""}" onclick="switchColToText(${pi},${si},${ci})">Text</button>
+        <button class="btn btn-sm${hasItems?" btn-primary":""}" onclick="switchColToList(${pi},${si},${ci})">Bullet List</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-sm btn-danger" onclick="data.projects[${pi}].detail.sections[${si}].columns.splice(${ci},1);render()">✕</button>
+      </div>
+      ${hasItems
+        ? col.items.map((item, ii) => `
+            <div style="display:flex;gap:6px;margin-bottom:4px;">
+              <span style="color:var(--primary);margin-top:3px;">▹</span>
+              <input style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--fg);padding:4px 8px;font-size:12px;"
+                value="${esc(item)}" oninput="data.projects[${pi}].detail.sections[${si}].columns[${ci}].items[${ii}]=this.value"/>
+              <button class="btn btn-sm btn-danger" style="padding:2px 6px" onclick="data.projects[${pi}].detail.sections[${si}].columns[${ci}].items.splice(${ii},1);render()">✕</button>
+            </div>`).join("") +
+          `<button class="btn btn-sm" style="margin-top:4px" onclick="data.projects[${pi}].detail.sections[${si}].columns[${ci}].items.push('');render()">+ Item</button>`
+        : `<textarea rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--fg);padding:8px;font-size:12px;resize:vertical;"
+            oninput="data.projects[${pi}].detail.sections[${si}].columns[${ci}].text=this.value">${esc(col.text || "")}</textarea>`
+      }
+    </div>`;
+}
+
+
+// ================================================================
+//  SKILLS TAB
+// ================================================================
+function renderSkills() {
+  return `
+    <div class="sec-head">
+      <h2>Skills</h2>
+      <span class="count">${data.skills.length} categories</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary" onclick="addSkillCategory()">+ New Category</button>
+    </div>
+    ${data.skills.map((cat, ci) => `
+      <div class="editor-card" data-draggable data-idx="${ci}" data-list="skills">
+        <div class="card-header" onclick="toggleCard(this)">
+          <div class="drag-handle">⠿</div>
+          <span class="card-title">${esc(cat.category)}</span>
+          <span class="card-subtitle">${cat.items.length} items</span>
+          <span class="card-chevron">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Category Name</label>
+            <input value="${esc(cat.category)}" oninput="data.skills[${ci}].category=this.value;updateCardTitle(this,${ci})"/>
+          </div>
+          ${cat.items.map((s, si) => `
+            <div class="skill-row" data-draggable data-idx="${si}" data-list="skills.${ci}.items">
+              <div class="drag-handle">⠿</div>
+              <input class="skill-name-input" value="${esc(s.name)}" oninput="data.skills[${ci}].items[${si}].name=this.value"/>
+              <input type="range" class="skill-slider" min="0" max="100" value="${s.pct}"
+                oninput="data.skills[${ci}].items[${si}].pct=parseInt(this.value);this.nextElementSibling.textContent=this.value+'%'"/>
+              <span class="skill-pct">${s.pct}%</span>
+              <button class="skill-remove" onclick="data.skills[${ci}].items.splice(${si},1);render()">✕</button>
+            </div>`).join("")}
+          <button class="btn btn-sm" onclick="data.skills[${ci}].items.push({name:'New Skill',pct:50});render()">+ Add Skill</button>
+        </div>
+        <div class="card-actions">
+          <div style="flex:1"></div>
+          <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete category?')){data.skills.splice(${ci},1);render();toast('Category deleted')}">Delete</button>
+        </div>
+      </div>`).join("")}`;
+}
+
+
+// ================================================================
+//  ABOUT TAB
+// ================================================================
+function renderAbout() {
+  const a = data.about;
+  return `
+    <div class="sec-head"><h2>About</h2></div>
+
+    <h3 style="font-size:14px;margin-bottom:12px;">Bio Paragraphs</h3>
+    <div class="field-hint" style="margin-bottom:10px">Each entry becomes a paragraph. Drag to reorder.</div>
+    ${a.bio.map((p, i) => `
+      <div class="list-item" data-draggable data-idx="${i}" data-list="about.bio">
+        <div class="drag-handle">⠿</div>
+        <textarea oninput="data.about.bio[${i}]=this.value">${esc(p)}</textarea>
+        <button class="btn btn-sm btn-danger" onclick="data.about.bio.splice(${i},1);render()">✕</button>
+      </div>`).join("")}
+    <button class="btn btn-sm" onclick="data.about.bio.push('');render()">+ Add Paragraph</button>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0"/>
+    <h3 style="font-size:14px;margin-bottom:12px;">Highlights</h3>
+    ${a.highlights.map((h, i) => `
+      <div class="list-item" data-draggable data-idx="${i}" data-list="about.highlights">
+        <div class="drag-handle">⠿</div>
+        <textarea rows="1" oninput="data.about.highlights[${i}]=this.value">${esc(h)}</textarea>
+        <button class="btn btn-sm btn-danger" onclick="data.about.highlights.splice(${i},1);render()">✕</button>
+      </div>`).join("")}
+    <button class="btn btn-sm" onclick="data.about.highlights.push('');render()">+ Add Highlight</button>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0"/>
+    <h3 style="font-size:14px;margin-bottom:12px;">Education</h3>
+    ${a.education.map((e, i) => `
+      <div class="editor-card">
+        <div class="card-body open">
+          <div class="field-row">
+            <div class="field"><label>Degree / Program</label><input value="${esc(e.degree)}" oninput="data.about.education[${i}].degree=this.value"/></div>
+            <div class="field"><label>School</label><input value="${esc(e.school)}" oninput="data.about.education[${i}].school=this.value"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Years</label><input value="${esc(e.years)}" oninput="data.about.education[${i}].years=this.value"/></div>
+          </div>
+          <div class="field"><label>Detail</label><textarea rows="2" oninput="data.about.education[${i}].detail=this.value">${esc(e.detail)}</textarea></div>
+          <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete?')){data.about.education.splice(${i},1);render()}">Delete</button>
+        </div>
+      </div>`).join("")}
+    <button class="btn btn-sm" onclick="data.about.education.push({degree:'',school:'',years:'',detail:''});render()">+ Add Education</button>`;
+}
+
+
+// ================================================================
+//  CONTACT TAB
+// ================================================================
+function renderContact() {
+  const c = data.contact;
+  return `
+    <div class="sec-head"><h2>Contact</h2></div>
+    <div class="field"><label>Section Headline</label><input value="${esc(c.headline)}" oninput="data.contact.headline=this.value"/></div>
+    <div class="field"><label>Subtitle</label><input value="${esc(c.sub)}" oninput="data.contact.sub=this.value"/></div>
+
+    <h3 style="font-size:14px;margin:16px 0 12px;">Links</h3>
+    ${c.links.map((l, i) => `
+      <div class="editor-card">
+        <div class="card-body open">
+          <div class="field-row">
+            <div class="field"><label>Label</label><input value="${esc(l.label)}" oninput="data.contact.links[${i}].label=this.value"/></div>
+            <div class="field"><label>Handle / display text</label><input value="${esc(l.handle)}" oninput="data.contact.links[${i}].handle=this.value"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>URL</label><input value="${esc(l.href)}" oninput="data.contact.links[${i}].href=this.value"/></div>
+            <div class="field">
+              <label>Icon</label>
+              <select onchange="data.contact.links[${i}].icon=this.value">
+                ${["mail","github","linkedin","external"].map(ic => `<option${l.icon===ic?" selected":""}>${ic}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete?')){data.contact.links.splice(${i},1);render()}">Delete</button>
+        </div>
+      </div>`).join("")}
+    <button class="btn btn-sm" onclick="data.contact.links.push({label:'',handle:'',href:'',icon:'external'});render()">+ Add Link</button>`;
+}
+
+
+// ================================================================
+//  META TAB
+// ================================================================
+function renderMeta() {
+  return `
+    <div class="sec-head"><h2>Site Meta</h2></div>
+    <div class="field"><label>Full Name</label><input value="${esc(data.name)}" oninput="data.name=this.value"/></div>
+    <div class="field"><label>Nav Brand</label><input value="${esc(data.brand)}" oninput="data.brand=this.value"/></div>
+    <div class="field"><label>Resume PDF path</label><input value="${esc(data.resume.file)}" oninput="data.resume.file=this.value"/></div>`;
+}
+
+
+// ================================================================
+//  PROJECT HELPERS
+// ================================================================
+function addProject() {
+  data.projects.push({
+    id: "new-project-" + Date.now(),
+    title: "New Project",
+    subtitle: "",
+    status: "completed",
+    featured: false,
+    tags: [],
+    thumb: null,
+    video: null,
+    description: "",
+    detail: {
+      lede: "",
+      date: "",
+      demoVideo: null,
+      sections: [],
+      links: [],
+    },
+  });
+  render();
+  toast("Project added — expand it to edit");
+}
+
+function duplicateProject(i) {
+  const copy = JSON.parse(JSON.stringify(data.projects[i]));
+  copy.id = copy.id + "-copy";
+  copy.title = copy.title + " (copy)";
+  data.projects.splice(i + 1, 0, copy);
+  render();
+  toast("Project duplicated");
+}
+
+function ensureDetail(i) {
+  if (!data.projects[i].detail) {
+    data.projects[i].detail = { lede: "", date: "", demoVideo: null, sections: [], links: [] };
+  }
+}
+
+function setDemoVideo(i, val) {
+  ensureDetail(i);
+  if (val) {
+    data.projects[i].detail.demoVideo = { src: val, poster: data.projects[i].thumb || "" };
+  } else {
+    data.projects[i].detail.demoVideo = null;
+  }
+}
+
+function addTag(i, tag) {
+  tag = tag.trim();
+  if (tag && !data.projects[i].tags.includes(tag)) {
+    data.projects[i].tags.push(tag);
+    render();
+  }
+}
+
+function addSection(pi, layout) {
+  ensureDetail(pi);
+  data.projects[pi].detail.sections.push({
+    layout: layout,
+    columns: [{ title: "", text: "" }],
+  });
+  render();
+}
+
+function addColumn(pi, si) {
+  data.projects[pi].detail.sections[si].columns.push({ title: "", text: "" });
+  render();
+}
+
+function switchColToText(pi, si, ci) {
+  const col = data.projects[pi].detail.sections[si].columns[ci];
+  delete col.items;
+  col.text = col.text || "";
+  render();
+}
+
+function switchColToList(pi, si, ci) {
+  const col = data.projects[pi].detail.sections[si].columns[ci];
+  delete col.text;
+  col.items = col.items || [""];
+  render();
+}
+
+function addSkillCategory() {
+  data.skills.push({ category: "New Category", items: [{ name: "New Skill", pct: 50 }] });
+  render();
+  toast("Category added");
+}
+
+
+// ================================================================
+//  UI HELPERS
+// ================================================================
+function toggleCard(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector(".card-chevron");
+  body.classList.toggle("open");
+  chevron.classList.toggle("open");
+}
+
+function updateCardTitle(input, idx) {
+  const header = input.closest(".card-body").previousElementSibling;
+  const title = header.querySelector(".card-title");
+  if (title) title.textContent = input.value;
+}
+
+
+// ================================================================
+//  IMPORT / EXPORT
+// ================================================================
+function exportFile() {
+  const clean = JSON.parse(JSON.stringify(data));
+  // Remove undefined/null optional fields to keep it tidy
+  clean.projects.forEach(p => {
+    if (!p.thumb) p.thumb = null;
+    if (!p.video) p.video = null;
+  });
+
+  let js = "// ================================================================\n";
+  js += "//\n";
+  js += "//  content.js — Single source of truth for the entire portfolio.\n";
+  js += "//\n";
+  js += "//  To update the site, edit the data below. No HTML changes needed.\n";
+  js += "//  Adding a new project = add one object to SITE.projects. That's it.\n";
+  js += "//\n";
+  js += "// ================================================================\n\n";
+  js += "const SITE = " + JSON.stringify(clean, null, 2) + ";\n";
+
+  const blob = new Blob([js], { type: "application/javascript" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "content.js";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("content.js downloaded — replace the file in your project folder");
+}
+
+function importFile() {
+  const input = document.getElementById("file-input");
+  input.onchange = () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        // Extract JSON from content.js
+        const text = reader.result;
+        const match = text.match(/const\s+SITE\s*=\s*(\{[\s\S]*\});?\s*$/);
+        if (match) {
+          // Evaluate as JSON (safer: use Function constructor)
+          const fn = new Function("return " + match[1]);
+          data = fn();
+          render();
+          toast("Imported successfully!");
+        } else {
+          // Try evaluating the whole file
+          const fn2 = new Function(text + "; return SITE;");
+          data = fn2();
+          render();
+          toast("Imported successfully!");
+        }
+      } catch (e) {
+        toast("Import failed: " + e.message);
+      }
+    };
+    reader.readAsText(file);
+    input.value = "";
+  };
+  input.click();
+}
+
+function previewSite() {
+  window.open("index.html", "_blank");
+}
+
+
+// ================================================================
+//  INIT
+// ================================================================
+render();
+</script>
+</body>
+</html>

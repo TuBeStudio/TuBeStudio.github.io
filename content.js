@@ -8,339 +8,390 @@
 // ================================================================
 
 const SITE = {
-
-  // ── Identity ────────────────────────────────────────────────────
-  name:  "Tuur Bellers",
-  brand: "<TB/>",
-
-  // ── Hero (index.html) ──────────────────────────────────────────
-  hero: {
-    label: "// GAME DEVELOPER",
-    roles: [
+  "name": "Tuur Bellers",
+  "brand": "<TB/>",
+  "hero": {
+    "label": "// GAME DEVELOPER",
+    "roles": [
       "Gameplay Programmer",
       "AI Systems Developer",
       "UE5 / Unity",
+      "Research Engineer"
     ],
-    bio: "Gameplay & AI programming student at Howest DAE — building responsive gameplay systems and intelligent behaviors that make worlds feel alive.",
+    "bio": "Gameplay & AI programming student at Howest DAE — building responsive gameplay systems and intelligent behaviors that make worlds feel alive."
   },
-
-  // ── About ──────────────────────────────────────────────────────
-  about: {
-    bio: [
+  "about": {
+    "bio": [
       "I'm a gameplay & AI programming student at Howest DAE, passionate about building systems that surprise and delight players. From behavior trees and utility AI to tight gameplay loops, I care deeply about the feel of the final product.",
       "I enjoy prototyping fast, iterating with teams, and bridging the gap between technical constraints and creative vision. I've shipped a co-op brawler with a 6-person team and built standalone AI systems from scratch in C++.",
-      "Currently finishing my graduation project on LLM-driven Behavior Trees in UE5. Open to internships and junior roles in gameplay or AI programming.",
+      "Currently finishing my graduation project on LLM-driven Behavior Trees in UE5. Open to internships and junior roles in gameplay or AI programming."
     ],
-    highlights: [
+    "highlights": [
       "Strong C++ background; comfortable with C#",
       "Unity & Unreal Engine 5 experience",
       "AI systems: Utility AI, FSMs, Behavior Trees",
-      "Collaborative, feedback-driven workflow",
+      "Collaborative, feedback-driven workflow"
     ],
-    education: [
+    "education": [
       {
-        degree: "DAE — Gameplay & AI Programming",
-        school: "Howest University of Applied Sciences",
-        years:  "2022 – present",
-        detail: "Specialization in gameplay systems, AI for games (FSM, Utility AI, Behavior Trees), C++, C#, Unity, and Unreal Engine 5.",
+        "degree": "DAE — Gameplay & AI Programming",
+        "school": "Howest University of Applied Sciences",
+        "years": "2022 – present",
+        "detail": "Specialization in gameplay systems, AI for games (FSM, Utility AI, Behavior Trees), C++, C#, Unity, and Unreal Engine 5."
+      }
+    ]
+  },
+  "contact": {
+    "headline": "GET IN TOUCH",
+    "sub": "Open to internship and junior roles in gameplay or AI programming. I reply fast.",
+    "links": [
+      {
+        "label": "Email",
+        "handle": "tuur.bellers@gmail.com",
+        "href": "mailto:tuur.bellers@gmail.com",
+        "icon": "mail"
       },
-    ],
+      {
+        "label": "GitHub",
+        "handle": "@TuurBellersDAE",
+        "href": "https://github.com/TuurBellersDAE",
+        "icon": "github"
+      },
+      {
+        "label": "LinkedIn",
+        "handle": "linkedin.com/in/tuur-bellers",
+        "href": "https://www.linkedin.com/in/tuur-bellers",
+        "icon": "linkedin"
+      }
+    ]
   },
-
-  // ── Contact ────────────────────────────────────────────────────
-  contact: {
-    headline: "GET IN TOUCH",
-    sub: "Open to internship and junior roles in gameplay or AI programming. I reply fast.",
-    links: [
-      { label: "Email",    handle: "tuur.bellers@gmail.com",       href: "mailto:tuur.bellers@gmail.com",            icon: "mail" },
-      { label: "GitHub",   handle: "@TuurBellersDAE",              href: "https://github.com/TuurBellersDAE",        icon: "github" },
-      { label: "LinkedIn", handle: "linkedin.com/in/tuur-bellers", href: "https://www.linkedin.com/in/tuur-bellers", icon: "linkedin" },
-    ],
-  },
-
-  // ── Skills ─────────────────────────────────────────────────────
-  // Each category renders as a card with progress bars.
-  skills: [
+  "skills": [
     {
-      category: "Game Engines",
-      items: [
-        { name: "Unity",           pct: 85 },
-        { name: "Unreal Engine 5", pct: 75 },
-      ],
+      "category": "Game Engines",
+      "items": [
+        {
+          "name": "Unity",
+          "pct": 85
+        },
+        {
+          "name": "Unreal Engine 5",
+          "pct": 75
+        }
+      ]
     },
     {
-      category: "Programming",
-      items: [
-        { name: "C++", pct: 80 },
-        { name: "C#",  pct: 85 },
-      ],
+      "category": "Programming",
+      "items": [
+        {
+          "name": "C++",
+          "pct": 80
+        },
+        {
+          "name": "C#",
+          "pct": 85
+        }
+      ]
     },
     {
-      category: "AI Systems",
-      items: [
-        { name: "Finite State Machines", pct: 90 },
-        { name: "Utility AI",            pct: 85 },
-        { name: "Behavior Trees",        pct: 80 },
-      ],
+      "category": "AI Systems",
+      "items": [
+        {
+          "name": "Finite State Machines",
+          "pct": 90
+        },
+        {
+          "name": "Utility AI",
+          "pct": 85
+        },
+        {
+          "name": "Behavior Trees",
+          "pct": 80
+        }
+      ]
     },
     {
-      category: "Tools",
-      items: [
-        { name: "Git / Perforce", pct: 85 },
-        { name: "Blender",        pct: 55 },
-        { name: "Photoshop",      pct: 60 },
-      ],
-    },
+      "category": "Tools",
+      "items": [
+        {
+          "name": "Git / Perforce",
+          "pct": 85
+        },
+        {
+          "name": "Blender",
+          "pct": 55
+        },
+        {
+          "name": "Photoshop",
+          "pct": 60
+        }
+      ]
+    }
   ],
-
-  // ── Résumé ─────────────────────────────────────────────────────
-  resume: {
-    file: "assets/resume.pdf",
+  "resume": {
+    "file": "assets/resume.pdf"
   },
-
-  // ── Projects ───────────────────────────────────────────────────
-  //
-  //  featured : true  → appears on the home-page teaser
-  //  status   : "completed" | "ongoing"
-  //  thumb    : path to thumbnail image (or null for a placeholder)
-  //  video    : path to hover-preview video on the card (or null)
-  //
-  //  detail.sections[]
-  //    layout  : "two-col" | "single"
-  //    columns : array of { title, text?, items? }
-  //              text  = paragraph string (supports \n for line breaks)
-  //              items = bullet-point array
-  //
-  projects: [
-
-    // ── Utility AI ───────────────────────────────────────────────
+  "projects": [
     {
-      id:          "utility-ai",
-      title:       "Utility AI — Autonomous Agent",
-      subtitle:    "C++",
-      status:      "completed",
-      featured:    true,
-      tags:        ["C++", "AI", "Systems", "Solo"],
-      thumb:       "assets/utility-thumb.png",
-      video:       "assets/utility-demo.mp4",
-      description: "Hybrid FSM + Utility AI for a zombie survival game. Context-aware decision-making for exploration, item collection, fleeing, and combat.",
-      detail: {
-        lede: "Hybrid FSM + Utility AI for a zombie survival game. The agent evaluates context each frame to explore, collect items, flee, or engage.",
-        date: "May 2025 – Jun 2025",
-        demoVideo: { src: "assets/utility-demo.mp4", poster: "assets/utility-thumb.png" },
-        sections: [
+      "id": "utility-ai",
+      "title": "Utility AI — Autonomous Agent",
+      "subtitle": "C++",
+      "status": "completed",
+      "featured": true,
+      "tags": [
+        "C++",
+        "AI",
+        "Systems",
+        "Solo"
+      ],
+      "thumb": "assets/utility-thumb.png",
+      "video": "assets/utility-demo.mp4",
+      "description": "Hybrid FSM + Utility AI for a zombie survival game. Context-aware decision-making for exploration, item collection, fleeing, and combat.",
+      "detail": {
+        "lede": "Hybrid FSM + Utility AI for a zombie survival game. The agent evaluates context each frame to explore, collect items, flee, or engage.",
+        "date": "May 2025 – Jun 2025",
+        "demoVideo": {
+          "src": "assets/utility-demo.mp4",
+          "poster": "assets/utility-thumb.png"
+        },
+        "sections": [
           {
-            layout: "two-col",
-            columns: [
+            "layout": "two-col",
+            "columns": [
               {
-                title: "Goal",
-                text:  "Build an autonomous agent that survives through robust decision-making. I combined a high-level FSM (Explore / Attack / Flee) with a per-state Utility AI that scores actions and executes the best one every frame.",
+                "title": "Goal",
+                "text": "Build an autonomous agent that survives through robust decision-making. I combined a high-level FSM (Explore / Attack / Flee) with a per-state Utility AI that scores actions and executes the best one every frame."
               },
               {
-                title: "My Role",
-                items: [
+                "title": "My Role",
+                "items": [
                   "Designed Utility AI (scoring & selection loop)",
                   "Integrated FSM states with action sets",
                   "Implemented item handling, survival priorities, steering",
-                  "Built debug UI & tunables for iteration",
-                ],
-              },
-            ],
+                  "Built debug UI & tunables for iteration"
+                ]
+              }
+            ]
           },
           {
-            layout: "single",
-            columns: [
+            "layout": "single",
+            "columns": [
               {
-                title: "Highlights",
-                items: [
+                "title": "Highlights",
+                "items": [
                   "Context-aware action scoring (health, ammo, distance, threats)",
                   "Exploration vs. item seeking vs. combat prioritization",
                   "Partial observability + simple memory",
-                  "Extensible action interface",
-                ],
-              },
-            ],
-          },
+                  "Extensible action interface"
+                ]
+              }
+            ]
+          }
         ],
-        links: [
-          { label: "View Code", url: "https://github.com/TuurBellersDAE/Zombie-Game-AI", icon: "github" },
-        ],
-      },
-    },
-
-    // ── Shrimpact ────────────────────────────────────────────────
-    {
-      id:          "shrimpact",
-      title:       "Shrimpact",
-      subtitle:    "Unity",
-      status:      "completed",
-      featured:    true,
-      tags:        ["Unity", "C#", "Gameplay", "Team"],
-      thumb:       "assets/shrimpact-thumb.png",
-      video:       "assets/shrimpact-demo.mp4",
-      description: "6-person team arena brawler. I designed and built reactive environmental hazards and a lightweight fish-school AI.",
-      detail: {
-        lede: "Two-player couch co-op arena brawler built by a 6-person team.",
-        date: "Feb 2025 – Jun 2025",
-        demoVideo: { src: "assets/shrimpact-demo.mp4", poster: "assets/shrimpact-thumb.png" },
-        sections: [
+        "links": [
           {
-            layout: "two-col",
-            columns: [
+            "label": "View Code",
+            "url": "https://github.com/TuurBellersDAE/Zombie-Game-AI",
+            "icon": "github"
+          }
+        ]
+      }
+    },
+    {
+      "id": "shrimpact",
+      "title": "Shrimpact",
+      "subtitle": "Unity",
+      "status": "completed",
+      "featured": true,
+      "tags": [
+        "Unity",
+        "C#",
+        "Gameplay",
+        "Team"
+      ],
+      "thumb": "assets/shrimpact-thumb.png",
+      "video": "assets/shrimpact-demo.mp4",
+      "description": "6-person team arena brawler. I designed and built reactive environmental hazards and a lightweight fish-school AI.",
+      "detail": {
+        "lede": "Two-player couch co-op arena brawler built by a 6-person team.",
+        "date": "Feb 2025 – Jun 2025",
+        "demoVideo": {
+          "src": "assets/shrimpact-demo.mp4",
+          "poster": "assets/shrimpact-thumb.png"
+        },
+        "sections": [
+          {
+            "layout": "two-col",
+            "columns": [
               {
-                title: "My Role",
-                items: [
+                "title": "My Role",
+                "items": [
                   "Designed & built interactive environmental hazards",
                   "Created lightweight fish-school AI for ambient background",
                   "Collaborated with artist to connect animation and mechanics",
-                  "Worked with the team to design the game",
-                ],
+                  "Worked with the team to design the game"
+                ]
               },
               {
-                title: "Tech Stack",
-                items: [
+                "title": "Tech Stack",
+                "items": [
                   "Unity (C#), VS, Perforce",
-                  "Team: 3 programmers, 1 tech artist, 2 style artists",
-                ],
-              },
-            ],
-          },
+                  "Team: 3 programmers, 1 tech artist, 2 style artists"
+                ]
+              }
+            ]
+          }
         ],
-        links: [
-          { label: "Play on itch.io", url: "https://jelleadyns.itch.io/shrimpact", icon: "external" },
-        ],
-      },
-    },
-
-    // ── Tower Defense ────────────────────────────────────────────
-    {
-      id:          "tower-defense",
-      title:       "Tower Defense",
-      subtitle:    "Unity",
-      status:      "completed",
-      featured:    true,
-      tags:        ["Unity", "C#", "NavMesh", "Solo"],
-      thumb:       "assets/towerdefense-thumb.png",
-      video:       "assets/towerdefense-demo.mp4",
-      description: "Solo prototype — resource harvesting, NPC trading, NavMesh ally recruitment, combat, and a hunger system.",
-      detail: {
-        lede: "My first Unity game: a solo-built tower defense prototype where I handled almost all of the programming and game design.",
-        date: "2025",
-        demoVideo: { src: "assets/towerdefense-demo.mp4", poster: "assets/towerdefense-thumb.png" },
-        sections: [
+        "links": [
           {
-            layout: "two-col",
-            columns: [
+            "label": "Play on itch.io",
+            "url": "https://jelleadyns.itch.io/shrimpact",
+            "icon": "external"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tower-defense",
+      "title": "Tower Defense",
+      "subtitle": "Unity",
+      "status": "completed",
+      "featured": true,
+      "tags": [
+        "Unity",
+        "C#",
+        "NavMesh",
+        "Solo"
+      ],
+      "thumb": "assets/towerdefense-thumb.png",
+      "video": "assets/towerdefense-demo.mp4",
+      "description": "Solo prototype — resource harvesting, NPC trading, NavMesh ally recruitment, combat, and a hunger system.",
+      "detail": {
+        "lede": "My first Unity game: a solo-built tower defense prototype where I handled almost all of the programming and game design.",
+        "date": "2025",
+        "demoVideo": {
+          "src": "assets/towerdefense-demo.mp4",
+          "poster": "assets/towerdefense-thumb.png"
+        },
+        "sections": [
+          {
+            "layout": "two-col",
+            "columns": [
               {
-                title: "Gameplay Loop",
-                items: [
+                "title": "Gameplay Loop",
+                "items": [
                   "Gather wood from trees and earn gold by defeating enemies",
                   "Trade with an NPC to upgrade your tower's defenses and attacks",
                   "Hire allies from another NPC who march via NavMesh to assault the opposing tower",
-                  "Hunt sheep to keep hunger and health in check while managing the battlefield",
-                ],
+                  "Hunt sheep to keep hunger and health in check while managing the battlefield"
+                ]
               },
               {
-                title: "Tech Highlights",
-                items: [
+                "title": "Tech Highlights",
+                "items": [
                   "Unity C# prototype built primarily solo, using only minimal starter assets",
                   "NavMesh-based pathfinding for enemies and recruited allies",
                   "Interactable NPC flows for tower upgrades and ally recruitment",
                   "Lightweight resource and combat systems tuned for quick sessions",
-                  "Small inventory system with limited functionality",
-                ],
-              },
-            ],
+                  "Small inventory system with limited functionality"
+                ]
+              }
+            ]
           },
           {
-            layout: "single",
-            columns: [
+            "layout": "single",
+            "columns": [
               {
-                title: "Notes",
-                text:  "This was my first Unity project, and the core game idea was entirely my own. I owned the programming and gameplay tuning end-to-end, from harvesting and economy balancing to NPC interactions and combat.",
-              },
-            ],
-          },
+                "title": "Notes",
+                "text": "This was my first Unity project, and the core game idea was entirely my own. I owned the programming and gameplay tuning end-to-end, from harvesting and economy balancing to NPC interactions and combat."
+              }
+            ]
+          }
         ],
-        links: [
-          { label: "View Code", url: "https://github.com/TuurBellersDAE/GEP_UnityProject", icon: "github" },
-        ],
-      },
+        "links": [
+          {
+            "label": "View Code",
+            "url": "https://github.com/TuurBellersDAE/GEP_UnityProject",
+            "icon": "github"
+          }
+        ]
+      }
     },
-
-    // ── LLM-Guided BT Evolution ─────────────────────────────────
     {
-      id:          "llm-bt-evolution",
-      title:       "LLM-Guided BT Evolution",
-      subtitle:    "UE5 / C++",
-      status:      "ongoing",
-      featured:    false,
-      tags:        ["Unreal", "C++", "AI", "Research"],
-      thumb:       null,
-      video:       null,
-      description: "Research: using Large Language Models to generate and evolve Behavior Trees at runtime in UE5, then export successful structures as reusable BT assets.",
-      detail: {
-        lede: "Research project exploring how Large Language Models can generate and evolve Behavior Trees at runtime in Unreal Engine 5.",
-        date: "2025 – Present",
-        demoVideo: null,
-        sections: [
+      "id": "llm-bt-evolution",
+      "title": "LLM-Guided BT Evolution",
+      "subtitle": "UE5 / C++",
+      "status": "ongoing",
+      "featured": false,
+      "tags": [
+        "Unreal",
+        "C++",
+        "AI",
+        "Research"
+      ],
+      "thumb": null,
+      "video": null,
+      "description": "Research: using Large Language Models to generate and evolve Behavior Trees at runtime in UE5, then export successful structures as reusable BT assets.",
+      "detail": {
+        "lede": "Research project exploring how Large Language Models can generate and evolve Behavior Trees at runtime in Unreal Engine 5.",
+        "date": "2025 – Present",
+        "demoVideo": null,
+        "sections": [
           {
-            layout: "single",
-            columns: [
+            "layout": "single",
+            "columns": [
               {
-                title: "Research Question",
-                text:  "How can a Large Language Model (LLM) be integrated into Unreal Engine 5 to dynamically generate and evolve NPC Behavior Trees at runtime — so that the resulting trees can later function independently as standard BT assets without requiring the LLM?",
-              },
-            ],
+                "title": "Research Question",
+                "text": "How can a Large Language Model (LLM) be integrated into Unreal Engine 5 to dynamically generate and evolve NPC Behavior Trees at runtime — so that the resulting trees can later function independently as standard BT assets without requiring the LLM?"
+              }
+            ]
           },
           {
-            layout: "single",
-            columns: [
+            "layout": "single",
+            "columns": [
               {
-                title: "Methodology",
-                text:  "A prototype Seeker NPC is built in Unreal Engine 5 using C++. Its core abilities — movement, observation, object inspection, and memory — are implemented as reusable Behavior Tree tasks and services providing perception data such as tagged objects, lighting, and visibility.\n\nDuring testing, an LLM receives structured sensory data describing what the NPC can see and which actions it can perform. Based on this input, the model generates short BT-like plans composed of predefined actions such as MoveTo, LookAt, or CheckUnder.\n\nThese plans are interpreted by a custom runtime system inside Unreal that validates and executes each instruction, while logging success rates, timing, and contextual factors. The most successful behaviors are exported as JSON Behavior Trees and then converted into native Unreal BT assets for reuse without any LLM connection.",
-              },
-            ],
+                "title": "Methodology",
+                "text": "A prototype Seeker NPC is built in Unreal Engine 5 using C++. Its core abilities — movement, observation, object inspection, and memory — are implemented as reusable Behavior Tree tasks and services providing perception data such as tagged objects, lighting, and visibility.\n\nDuring testing, an LLM receives structured sensory data describing what the NPC can see and which actions it can perform. Based on this input, the model generates short BT-like plans composed of predefined actions such as MoveTo, LookAt, or CheckUnder.\n\nThese plans are interpreted by a custom runtime system inside Unreal that validates and executes each instruction, while logging success rates, timing, and contextual factors. The most successful behaviors are exported as JSON Behavior Trees and then converted into native Unreal BT assets for reuse without any LLM connection."
+              }
+            ]
           },
           {
-            layout: "two-col",
-            columns: [
+            "layout": "two-col",
+            "columns": [
               {
-                title: "Hypotheses",
-                items: [
+                "title": "Hypotheses",
+                "items": [
                   "LLMs can produce valid, interpretable Behavior Tree structures that run successfully in Unreal Engine",
                   "LLM-guided runtime evolution yields more adaptive, context-aware NPC behavior than static designer trees",
-                  "Generated BTs can be exported as reusable assets functioning independently of the LLM",
-                ],
+                  "Generated BTs can be exported as reusable assets functioning independently of the LLM"
+                ]
               },
               {
-                title: "Experiment Parameters",
-                items: [
+                "title": "Experiment Parameters",
+                "items": [
                   "Independent variable: BT generation method (LLM-guided vs manually authored)",
                   "Dependent variables: success rate, adaptability, stability, believability",
                   "Scenario: single NPC hide-and-seek test in UE5",
-                  "Duration: ≈ 2 months",
-                ],
-              },
-            ],
+                  "Duration: ≈ 2 months"
+                ]
+              }
+            ]
           },
           {
-            layout: "single",
-            columns: [
+            "layout": "single",
+            "columns": [
               {
-                title: "Expected Outcomes",
-                items: [
+                "title": "Expected Outcomes",
+                "items": [
                   "Demonstrate that LLMs can author and evolve Behavior Trees live in UE5",
                   "Produce exportable BT assets replicating learned behavior without further LLM input",
-                  "Establish groundwork for adaptive AI pipelines combining machine reasoning with designer control",
-                ],
-              },
-            ],
-          },
+                  "Establish groundwork for adaptive AI pipelines combining machine reasoning with designer control"
+                ]
+              }
+            ]
+          }
         ],
-        links: [],
-      },
-    },
-
-  ],
+        "links": []
+      }
+    }
+  ]
 };
