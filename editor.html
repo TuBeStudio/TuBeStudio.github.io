@@ -394,6 +394,21 @@ function switchTab(tab) {
 
 function render() {
   const m = document.getElementById("main");
+  let preservedScroll = 0;
+  let preservedOpenCards = [];
+
+  // 1. Capture current scroll and open states
+  if (m) {
+    preservedScroll = m.scrollTop;
+    document.querySelectorAll(".editor-card").forEach(c => {
+      const body = c.querySelector(".card-body");
+      if (body && body.classList.contains("open")) {
+        preservedOpenCards.push(c.dataset.list + "-" + c.dataset.idx);
+      }
+    });
+  }
+
+  // 2. Re-render HTML
   switch (currentTab) {
     case "hero":     m.innerHTML = renderHero(); break;
     case "projects": m.innerHTML = renderProjects(); break;
@@ -403,6 +418,20 @@ function render() {
     case "meta":     m.innerHTML = renderMeta(); break;
   }
   bindDragDrop();
+
+  // 3. Restore scroll and open states
+  if (m) {
+    document.querySelectorAll(".editor-card").forEach(c => {
+      const key = c.dataset.list + "-" + c.dataset.idx;
+      if (preservedOpenCards.includes(key)) {
+        const body = c.querySelector(".card-body");
+        const chev = c.querySelector(".card-chevron");
+        if (body) body.classList.add("open");
+        if (chev) chev.classList.add("open");
+      }
+    });
+    m.scrollTop = preservedScroll;
+  }
 }
 
 // ================================================================

@@ -77,15 +77,22 @@ if (heroEl) {
         </div>`).join("")}
     </div>`).join("");
 
-  // ---- Filter buttons ----------------------------------------
-  const allTags = [...new Set(SITE.projects.flatMap(p => p.tags))].sort();
-  const filterRow = $("#filter-row");
-  allTags.forEach(tag => {
-    const b = Object.assign(document.createElement("button"), { className: "f-btn", textContent: tag });
-    b.dataset.filter = tag;
-    b.addEventListener("click", () => filterProjects(tag, b));
-    filterRow.appendChild(b);
-  });
+    // ---- Filter buttons ----------------------------------------
+    const allTags = [...new Set(SITE.projects.flatMap(p => p.tags))].sort();
+    const filterRow = $("#filter-row");
+
+    // Attach event listener to the existing hardcoded "All" button
+    const allBtn = filterRow.querySelector('[data-filter="all"]');
+    if (allBtn) {
+        allBtn.addEventListener("click", () => filterProjects("all", allBtn));
+    }
+
+    allTags.forEach(tag => {
+        const b = Object.assign(document.createElement("button"), { className: "f-btn", textContent: tag });
+        b.dataset.filter = tag;
+        b.addEventListener("click", () => filterProjects(tag, b));
+        filterRow.appendChild(b);
+    });
 
   // ---- Project cards -----------------------------------------
   $("#proj-grid").innerHTML = SITE.projects.map((p, i) => {
