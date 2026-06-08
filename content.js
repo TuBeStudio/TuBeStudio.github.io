@@ -77,7 +77,7 @@ const SITE = {
         {
           "name": "Unreal Engine 5",
           "pct": 75,
-          "score": 3.8
+          "score": 3
         }
       ]
     },
@@ -102,7 +102,7 @@ const SITE = {
         {
           "name": "Finite State Machines",
           "pct": 90,
-          "score": 4.5
+          "score": 4
         },
         {
           "name": "Utility AI",
@@ -122,17 +122,17 @@ const SITE = {
         {
           "name": "Git / Perforce",
           "pct": 85,
-          "score": 4.3
+          "score": 4
         },
         {
           "name": "Blender",
           "pct": 55,
-          "score": 2.8
+          "score": 2.5
         },
         {
           "name": "Photoshop",
           "pct": 60,
-          "score": 3
+          "score": 2.5
         }
       ]
     }
