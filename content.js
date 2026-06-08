@@ -224,7 +224,9 @@ const SITE = {
         "Unity",
         "C#",
         "Gameplay",
-        "Team"
+        "Team",
+        "Published",
+        "Steam"
       ],
       "thumb": "assets/shrimpact-thumb.png",
       "video": "assets/shrimpact-demo.mp4",
@@ -263,6 +265,11 @@ const SITE = {
           {
             "label": "Play on itch.io",
             "url": "https://jelleadyns.itch.io/shrimpact",
+            "icon": "external"
+          },
+          {
+            "label": "Steam",
+            "url": "https://store.steampowered.com/app/4481490/Shrimpact/",
             "icon": "external"
           }
         ]
