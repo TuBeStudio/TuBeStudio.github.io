@@ -875,10 +875,11 @@ function renderBuilderSection(section, index) {
     </section>`;
   }
   if (sec.type === "contact") {
+    const contactTitle = title === "Contact" && SITE.contact && SITE.contact.headline ? SITE.contact.headline : title;
     return `<section id="${esc(sec.id)}" class="${shellClass}"${renderBuilderSectionStyle(sec)}>
       <div class="${containerClass}">
         <p class="sec-num anim">// ${num}</p>
-        <h2 class="sec-title anim d1">${esc(title.toUpperCase())}</h2>
+        <h2 class="sec-title anim d1">${esc(contactTitle.toUpperCase())}</h2>
         <p class="contact-sub anim d2">${esc(SITE.contact.sub)}</p>
         <div class="contact-list" id="contact-list">${SITE.contact.links.map((c, i) => `
           <a class="c-link anim d${i + 1}" href="${esc(c.href)}"${c.href.startsWith("mailto") ? "" : ' target="_blank" rel="noopener"'}>

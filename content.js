@@ -53,8 +53,8 @@ const SITE = {
       },
       {
         "label": "GitHub",
-        "handle": "@TuurBellersDAE",
-        "href": "https://github.com/TuurBellersDAE",
+        "handle": "@TuBeStudio",
+        "href": "https://github.com/TuBeStudio",
         "icon": "github"
       },
       {
