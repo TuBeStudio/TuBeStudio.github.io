@@ -71,11 +71,13 @@ const SITE = {
       "items": [
         {
           "name": "Unity",
-          "pct": 85
+          "pct": 85,
+          "score": 4.3
         },
         {
           "name": "Unreal Engine 5",
-          "pct": 75
+          "pct": 75,
+          "score": 3.8
         }
       ]
     },
@@ -84,11 +86,13 @@ const SITE = {
       "items": [
         {
           "name": "C++",
-          "pct": 80
+          "pct": 80,
+          "score": 4
         },
         {
           "name": "C#",
-          "pct": 85
+          "pct": 85,
+          "score": 4.3
         }
       ]
     },
@@ -97,15 +101,18 @@ const SITE = {
       "items": [
         {
           "name": "Finite State Machines",
-          "pct": 90
+          "pct": 90,
+          "score": 4.5
         },
         {
           "name": "Utility AI",
-          "pct": 85
+          "pct": 85,
+          "score": 4.3
         },
         {
           "name": "Behavior Trees",
-          "pct": 80
+          "pct": 80,
+          "score": 4
         }
       ]
     },
@@ -114,15 +121,18 @@ const SITE = {
       "items": [
         {
           "name": "Git / Perforce",
-          "pct": 85
+          "pct": 85,
+          "score": 4.3
         },
         {
           "name": "Blender",
-          "pct": 55
+          "pct": 55,
+          "score": 2.8
         },
         {
           "name": "Photoshop",
-          "pct": 60
+          "pct": 60,
+          "score": 3
         }
       ]
     }
@@ -194,6 +204,14 @@ const SITE = {
             "icon": "github"
           }
         ]
+      },
+      "caseStudy": {
+        "problem": "",
+        "role": "",
+        "challenge": "",
+        "solution": "",
+        "result": "",
+        "learnings": ""
       }
     },
     {
@@ -248,6 +266,14 @@ const SITE = {
             "icon": "external"
           }
         ]
+      },
+      "caseStudy": {
+        "problem": "",
+        "role": "",
+        "challenge": "",
+        "solution": "",
+        "result": "",
+        "learnings": ""
       }
     },
     {
@@ -314,6 +340,14 @@ const SITE = {
             "icon": "github"
           }
         ]
+      },
+      "caseStudy": {
+        "problem": "",
+        "role": "",
+        "challenge": "",
+        "solution": "",
+        "result": "",
+        "learnings": ""
       }
     },
     {
@@ -391,7 +425,237 @@ const SITE = {
           }
         ],
         "links": []
+      },
+      "caseStudy": {
+        "problem": "",
+        "role": "",
+        "challenge": "",
+        "solution": "",
+        "result": "",
+        "learnings": ""
       }
+    }
+  ],
+  "customization": {
+    "palette": {
+      "bg": "#10131e",
+      "card": "#1a1f2e",
+      "sec": "#202739",
+      "border": "#2a3550",
+      "fg": "#e8ecff",
+      "muted": "#8f9ab8",
+      "primary": "#2dd4bf",
+      "accent": "#a78bfa"
+    },
+    "fonts": {
+      "display": "'Orbitron', 'Segoe UI', sans-serif",
+      "body": "'Segoe UI', 'Verdana', 'Tahoma', sans-serif",
+      "mono": "'Cascadia Code', 'Consolas', monospace"
+    },
+    "sectionVisibility": {
+      "projects": true,
+      "skills": true,
+      "about": true,
+      "contact": true
+    },
+    "aiAssistant": {
+      "enabled": true,
+      "name": "Nova",
+      "greeting": "Hi! I am Nova, Tuur's portfolio assistant. Ask me about projects, skills, or contact info.",
+      "startOpen": false
+    },
+    "pageTemplates": [],
+    "styleProfiles": [
+      {
+        "id": "cyber-core",
+        "name": "Cyber Core",
+        "palette": {
+          "bg": "#10131e",
+          "card": "#1a1f2e",
+          "sec": "#202739",
+          "border": "#2a3550",
+          "fg": "#e8ecff",
+          "muted": "#8f9ab8",
+          "primary": "#2dd4bf",
+          "accent": "#a78bfa"
+        },
+        "fonts": {
+          "display": "'Orbitron', 'Segoe UI', sans-serif",
+          "body": "'Segoe UI', 'Verdana', 'Tahoma', sans-serif",
+          "mono": "'Cascadia Code', 'Consolas', monospace"
+        }
+      }
+    ],
+    "currentStyleProfile": "cyber-core",
+    "builderSectionPrefabs": []
+  },
+  "customPages": [],
+  "availability": {
+    "enabled": false,
+    "text": "Open to internships and junior gameplay/AI roles.",
+    "ctaLabel": "Contact",
+    "ctaHref": "#contact"
+  },
+  "recruiterMode": {
+    "enabled": false,
+    "headline": "Recruiter Snapshot",
+    "summary": "Short hiring-focused summary.",
+    "bullets": [
+      "Top skill",
+      "Best project",
+      "Availability"
+    ],
+    "ctaLabel": "Download CV",
+    "ctaHref": "assets/resume.pdf"
+  },
+  "timeline": [],
+  "testimonials": [],
+  "pages": [
+    {
+      "id": "home",
+      "title": "Home",
+      "sections": [
+        {
+          "id": "home",
+          "type": "hero",
+          "visible": true,
+          "navLabel": "Hero",
+          "settings": {
+            "width": "boxed",
+            "padding": "normal",
+            "align": "left",
+            "background": "default",
+            "blockLayout": "grid",
+            "blockSurface": "card",
+            "theme": {
+              "inherit": true,
+              "primary": "",
+              "accent": "",
+              "card": "",
+              "bg": ""
+            }
+          },
+          "content": {
+            "title": "Hero",
+            "text": "",
+            "ctaLabel": "",
+            "ctaHref": "#contact"
+          },
+          "blocks": []
+        },
+        {
+          "id": "projects",
+          "type": "project-grid",
+          "visible": true,
+          "navLabel": "Projects",
+          "settings": {
+            "width": "boxed",
+            "padding": "normal",
+            "align": "left",
+            "background": "default",
+            "blockLayout": "grid",
+            "blockSurface": "card",
+            "theme": {
+              "inherit": true,
+              "primary": "",
+              "accent": "",
+              "card": "",
+              "bg": ""
+            }
+          },
+          "content": {
+            "title": "Projects",
+            "text": "",
+            "ctaLabel": "",
+            "ctaHref": "#contact"
+          },
+          "blocks": []
+        },
+        {
+          "id": "skills",
+          "type": "skills",
+          "visible": true,
+          "navLabel": "Skills",
+          "settings": {
+            "width": "boxed",
+            "padding": "normal",
+            "align": "left",
+            "background": "default",
+            "blockLayout": "grid",
+            "blockSurface": "card",
+            "theme": {
+              "inherit": true,
+              "primary": "",
+              "accent": "",
+              "card": "",
+              "bg": ""
+            }
+          },
+          "content": {
+            "title": "Skills",
+            "text": "",
+            "ctaLabel": "",
+            "ctaHref": "#contact"
+          },
+          "blocks": []
+        },
+        {
+          "id": "about",
+          "type": "about",
+          "visible": true,
+          "navLabel": "About",
+          "settings": {
+            "width": "boxed",
+            "padding": "normal",
+            "align": "left",
+            "background": "default",
+            "blockLayout": "grid",
+            "blockSurface": "card",
+            "theme": {
+              "inherit": true,
+              "primary": "",
+              "accent": "",
+              "card": "",
+              "bg": ""
+            }
+          },
+          "content": {
+            "title": "About",
+            "text": "",
+            "ctaLabel": "",
+            "ctaHref": "#contact"
+          },
+          "blocks": []
+        },
+        {
+          "id": "contact",
+          "type": "contact",
+          "visible": true,
+          "navLabel": "Contact",
+          "settings": {
+            "width": "boxed",
+            "padding": "normal",
+            "align": "left",
+            "background": "default",
+            "blockLayout": "grid",
+            "blockSurface": "card",
+            "theme": {
+              "inherit": true,
+              "primary": "",
+              "accent": "",
+              "card": "",
+              "bg": ""
+            }
+          },
+          "content": {
+            "title": "Contact",
+            "text": "",
+            "ctaLabel": "",
+            "ctaHref": "#contact"
+          },
+          "blocks": []
+        }
+      ]
     }
   ]
 };

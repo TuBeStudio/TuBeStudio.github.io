@@ -4,9 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Résumé — Tuur Bellers</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
@@ -15,24 +12,12 @@
 <header class="topbar">
   <div class="container navrow">
     <a class="brand" href="index.html">&lt;TB/&gt;</a>
-    <ul class="nav-links">
-      <li><a href="index.html#projects">Projects</a></li>
-      <li><a href="index.html#skills">Skills</a></li>
-      <li><a href="index.html#about">About</a></li>
-      <li><a href="index.html#contact">Contact</a></li>
-      <li><a href="resume.html" class="active">Résumé</a></li>
-    </ul>
+    <ul class="nav-links" id="nav-links"></ul>
     <button class="hamburger" id="hamburger" aria-expanded="false" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
   </div>
-  <nav class="mobile-nav" id="mobile-nav">
-    <a href="index.html#projects">Projects</a>
-    <a href="index.html#skills">Skills</a>
-    <a href="index.html#about">About</a>
-    <a href="index.html#contact">Contact</a>
-    <a href="resume.html">Résumé</a>
-  </nav>
+  <nav class="mobile-nav" id="mobile-nav"></nav>
 </header>
 
 <main class="container">

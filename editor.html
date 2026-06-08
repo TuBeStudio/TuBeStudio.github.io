@@ -126,6 +126,65 @@ a{color:var(--primary);text-decoration:none}
 .sb-link span{display:none;font-size:13px;font-weight:500;margin-left:10px}
 .sidebar.expanded .sb-link{width:auto;justify-content:flex-start;padding:0 14px;height:36px}
 .sidebar.expanded .sb-link span{display:inline}
+.sb-section{
+  height:30px;
+  font-size:11px;
+  opacity:.88;
+}
+.sb-hidden{
+  opacity:.45;
+}
+.sb-hidden span::after{
+  content:" hidden";
+  color:var(--danger);
+  font-family:var(--mono);
+  font-size:9px;
+  margin-left:4px;
+}
+.sb-section svg{width:14px;height:14px}
+.sidebar.expanded .sb-section{padding-left:24px}
+.sb-section span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.sb-label{
+  display:none;
+  padding:8px 14px 4px;
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--muted);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.sidebar.expanded .sb-label{display:block}
+.sb-label-row{
+  display:none;
+  align-items:center;
+  gap:6px;
+  padding:8px 10px 4px 14px;
+}
+.sidebar.expanded .sb-label-row{display:flex}
+.sb-label-row .sb-label{
+  display:block;
+  padding:0;
+  flex:1;
+}
+.sb-mini{
+  width:22px;
+  height:22px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--muted);
+  border-radius:var(--radius);
+  cursor:pointer;
+  font-family:var(--mono);
+  line-height:1;
+}
+.sb-mini:hover{
+  color:var(--primary);
+  border-color:var(--primary);
+}
 .sb-link[data-tooltip]::after{
   content:attr(data-tooltip);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
   background:var(--card);border:1px solid var(--border);border-radius:4px;
@@ -149,13 +208,16 @@ a{color:var(--primary);text-decoration:none}
   content:'';position:absolute;inset:-0 -4px;
 }
 .split-preview{
-  width:42%;min-width:200px;background:var(--bg);
+  width:50%;min-width:320px;background:var(--bg);
   display:flex;flex-direction:column;overflow:hidden;
 }
 .split-preview.hidden{display:none}
+#app.preview-focus .split-editor,
+#app.preview-focus .split-handle{display:none!important}
+#app.preview-focus .split-preview{width:100%!important;min-width:0}
 .preview-bar{
   display:flex;align-items:center;gap:6px;
-  padding:0 10px;height:34px;min-height:34px;
+  padding:5px 10px;min-height:34px;flex-wrap:wrap;
   background:var(--surface);border-bottom:1px solid var(--border);
   border-left:1px solid var(--border);font-size:11px;
 }
@@ -170,7 +232,30 @@ a{color:var(--primary);text-decoration:none}
   flex:1;font-family:var(--mono);color:var(--muted);font-size:10px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;
 }
+.compare-diff{
+  max-width:340px;font-family:var(--mono);font-size:10px;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;
+}
+.compare-diff strong{color:var(--primary);font-weight:700}
+.diff-chip{
+  border:1px solid var(--border);background:var(--card);color:var(--muted);
+  border-radius:999px;padding:1px 7px;font-size:10px;cursor:pointer;
+}
+.diff-chip:hover{border-color:var(--primary);color:var(--primary)}
+.diff-chip.active{background:var(--primary-dim);border-color:var(--primary);color:var(--primary)}
+.preview-shell{flex:1;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:8px}
+.preview-col{height:100%;display:flex;flex-direction:column;align-items:center;width:100%;min-width:0}
+#preview-shell.compare{gap:8px;align-items:stretch;justify-content:stretch}
+#preview-shell.compare .preview-col{flex:1;gap:4px}
+#preview-shell.compare .preview-label{font-size:10px;color:var(--muted);font-family:var(--mono);padding-left:4px}
 #preview-frame{flex:1;border:none;background:#0b0c10;width:100%}
+#preview-frame.viewport-desktop{width:100%;max-width:none;height:100%}
+#preview-frame.viewport-tablet{width:820px;max-width:100%;height:100%;border:1px solid var(--border);border-radius:8px}
+#preview-frame.viewport-mobile{width:390px;max-width:100%;height:100%;border:1px solid var(--border);border-radius:14px}
+#preview-frame-b{flex:1;border:none;background:#0b0c10;width:100%}
+#preview-frame-b.viewport-desktop{width:100%;max-width:none;height:100%}
+#preview-frame-b.viewport-tablet{width:820px;max-width:100%;height:100%;border:1px solid var(--border);border-radius:8px}
+#preview-frame-b.viewport-mobile{width:390px;max-width:100%;height:100%;border:1px solid var(--border);border-radius:14px}
 
 /* ================================================================
    COMPONENTS
@@ -319,18 +404,43 @@ a{color:var(--primary);text-decoration:none}
   color:var(--fg);padding:3px 6px;border-radius:4px;font-size:12px;min-width:0;
 }
 .sk-name-input:focus{border-color:var(--border);background:var(--bg)}
-.sk-slider{
-  -webkit-appearance:none;width:110px;height:3px;
-  background:var(--border);border-radius:2px;outline:none;cursor:pointer;
+.sk-score-wrap{display:flex;align-items:center;gap:8px}
+.sk-score{
+  width:62px;padding:5px 7px!important;
+  font-family:var(--mono);font-size:11px;text-align:center;
 }
-.sk-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;width:12px;height:12px;
-  border-radius:50%;background:var(--primary);cursor:pointer;
-  box-shadow:0 0 6px rgba(45,212,191,.3);
-}
-.sk-pct{font-family:var(--mono);font-size:11px;color:var(--muted);width:32px;text-align:right}
+.sk-score-pills{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:90px}
+.sk-pill{height:6px;border-radius:99px;background:var(--border);cursor:pointer;transition:all .12s;border:1px solid transparent}
+.sk-pill.active{background:var(--primary);box-shadow:0 0 10px rgba(45,212,191,.2);border-color:rgba(45,212,191,.35)}
+.sk-pill.half{background:linear-gradient(90deg,var(--primary) 50%,var(--border) 50%);border-color:rgba(45,212,191,.3)}
 .sk-del{background:none;border:none;color:var(--border-light);cursor:pointer;font-size:14px;padding:0 2px}
 .sk-del:hover{color:var(--danger)}
+
+/* Theme controls */
+.palette-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+.color-chip{display:flex;align-items:center;gap:8px}
+.color-chip input[type="color"]{width:28px;height:28px;padding:0;border:none;background:none;cursor:pointer}
+.preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tiny{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:10px 0 12px}
+.style-card{
+  border:1px solid var(--border);border-radius:8px;background:var(--card);overflow:hidden;
+  transition:border-color .12s,transform .12s;
+}
+.style-card.active{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary-mid)}
+.style-card:hover{transform:translateY(-1px)}
+.style-preview{padding:10px;border-bottom:1px solid var(--border)}
+.style-swatch-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px}
+.style-swatch{height:14px;border-radius:3px;border:1px solid rgba(255,255,255,.08)}
+.style-mini{
+  background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:7px;
+}
+.style-mini-title{font-size:9px;font-weight:700;letter-spacing:.08em;margin-bottom:5px}
+.style-mini-line{height:5px;border-radius:3px;background:var(--muted);opacity:.45;margin-bottom:4px}
+.style-mini-line:last-child{width:70%;margin-bottom:0}
+.style-meta{padding:8px 10px}
+.style-meta-head{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.style-name{font-size:11px;font-weight:700;flex:1}
 
 /* List items */
 .list-item{
@@ -512,31 +622,7 @@ a{color:var(--primary);text-decoration:none}
       <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('expanded')" title="Toggle sidebar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <button class="sb-link active" data-tab="hero" data-tooltip="Hero" onclick="switchTab('hero')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span>Hero</span>
-      </button>
-      <button class="sb-link" data-tab="projects" data-tooltip="Projects" onclick="switchTab('projects')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        <span>Projects</span>
-      </button>
-      <button class="sb-link" data-tab="skills" data-tooltip="Skills" onclick="switchTab('skills')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        <span>Skills</span>
-      </button>
-      <button class="sb-link" data-tab="about" data-tooltip="About" onclick="switchTab('about')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>About</span>
-      </button>
-      <button class="sb-link" data-tab="contact" data-tooltip="Contact" onclick="switchTab('contact')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        <span>Contact</span>
-      </button>
-      <div class="sb-sep"></div>
-      <button class="sb-link" data-tab="meta" data-tooltip="Settings" onclick="switchTab('meta')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2m-9-11h2m18 0h2m-3.3-6.7-1.4 1.4M6.7 17.3l-1.4 1.4m0-13.4 1.4 1.4m10.6 10.6 1.4 1.4"/></svg>
-        <span>Settings</span>
-      </button>
+      <div id="sidebar-dynamic"></div>
     </nav>
 
     <!-- ======== SPLIT PANE ======== -->
@@ -552,9 +638,32 @@ a{color:var(--primary);text-decoration:none}
             <option value="resume.html?draft=1">Resume</option>
           </select>
           <select id="preview-project" style="display:none" onchange="refreshPreview()"></select>
+          <select id="preview-viewport" onchange="setPreviewViewport(this.value)">
+            <option value="desktop">Desktop</option>
+            <option value="tablet">Tablet</option>
+            <option value="mobile">Mobile</option>
+          </select>
+          <button class="tb" id="btn-preview-compare" onclick="togglePreviewCompare()" title="A/B style compare">
+            <span class="tb-label">A/B</span>
+          </button>
+          <button class="tb" id="btn-preview-focus" onclick="togglePreviewFocus()" title="Focus preview">
+            <span class="tb-label">Focus</span>
+          </button>
+          <select id="preview-style-a" onchange="refreshPreview()"></select>
+          <select id="preview-style-b" style="display:none" onchange="refreshPreview()"></select>
+          <span class="compare-diff" id="compare-diff" style="display:none"></span>
           <span class="preview-url" id="preview-url"></span>
         </div>
-        <iframe id="preview-frame" title="Live preview"></iframe>
+        <div class="preview-shell" id="preview-shell">
+          <div class="preview-col">
+            <div class="preview-label">A</div>
+            <iframe id="preview-frame" class="viewport-desktop" title="Live preview A"></iframe>
+          </div>
+          <div class="preview-col" id="preview-col-b" style="display:none">
+            <div class="preview-label">B</div>
+            <iframe id="preview-frame-b" class="viewport-desktop" title="Live preview B"></iframe>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -586,13 +695,190 @@ a{color:var(--primary);text-decoration:none}
 //  STATE
 // ================================================================
 let data = JSON.parse(JSON.stringify(SITE));
-let currentTab = "hero";
+let currentTab = "builder";
 let previewVisible = true;
+let previewCompare = false;
+let selectedDeltaToken = "";
 let fileHandle = null;
 let dirty = false;
 let searchQuery = "";
 var openCards = new Set();   // tracks which cards are expanded
 var focusAfterRender = null; // selector to refocus after render
+var activeBuilderSectionIndex = null;
+var activeCustomPageIndex = null;
+
+var FONT_STACKS = {
+  system: "'Segoe UI', 'Verdana', 'Tahoma', sans-serif",
+  modern: "'Inter', 'Arial', 'Helvetica Neue', sans-serif",
+  display: "'Orbitron', 'Segoe UI', sans-serif",
+  humanist: "'Trebuchet MS', 'Segoe UI', sans-serif",
+  mono: "'Cascadia Code', 'Consolas', monospace",
+  jet: "'JetBrains Mono', 'Consolas', monospace"
+};
+var PALETTE_PRESETS = {
+  cyber: { bg:"#10131e", card:"#1a1f2e", sec:"#202739", border:"#2a3550", fg:"#e8ecff", muted:"#8f9ab8", primary:"#2dd4bf", accent:"#a78bfa" },
+  obsidian: { bg:"#0d0e11", card:"#1a1b1f", sec:"#23262d", border:"#313641", fg:"#f2f3f8", muted:"#9aa1b3", primary:"#60a5fa", accent:"#f472b6" },
+  ember: { bg:"#17110f", card:"#261b18", sec:"#322422", border:"#4b3531", fg:"#f9ede6", muted:"#b79d92", primary:"#fb923c", accent:"#f43f5e" },
+  mint: { bg:"#0f1714", card:"#172520", sec:"#1e3129", border:"#2d463a", fg:"#e9fff6", muted:"#8fb9a8", primary:"#34d399", accent:"#22d3ee" }
+};
+var BUILDER_SECTION_TYPES = ["hero","project-grid","skills","about","contact","text","cta","timeline","testimonials","availability","recruiter"];
+
+function normalizeDataModel() {
+  if (!data.customization) data.customization = {};
+  if (!data.customization.palette) data.customization.palette = JSON.parse(JSON.stringify(PALETTE_PRESETS.cyber));
+  if (!data.customization.fonts) {
+    data.customization.fonts = { display: FONT_STACKS.display, body: FONT_STACKS.system, mono: FONT_STACKS.mono };
+  }
+  if (!data.customization.sectionVisibility) {
+    data.customization.sectionVisibility = { projects:true, skills:true, about:true, contact:true };
+  }
+  if (!data.availability) data.availability = { enabled:false, text:"Open to internships and junior gameplay/AI roles.", ctaLabel:"Contact", ctaHref:"#contact" };
+  if (!data.recruiterMode) data.recruiterMode = { enabled:false, headline:"Recruiter Snapshot", summary:"Short hiring-focused summary.", bullets:["Top skill","Best project","Availability"], ctaLabel:"Download CV", ctaHref:"assets/resume.pdf" };
+  if (!Array.isArray(data.timeline)) data.timeline = [];
+  if (!Array.isArray(data.testimonials)) data.testimonials = [];
+  if (!Array.isArray(data.pages)) {
+    data.pages = [{ id:"home", title:"Home", sections:[
+      newBuilderSection("hero", true),
+      newBuilderSection("project-grid", true),
+      newBuilderSection("skills", true),
+      newBuilderSection("about", true),
+      newBuilderSection("contact", true)
+    ] }];
+  }
+  data.pages.forEach(function(page) {
+    if (!Array.isArray(page.sections)) page.sections = [];
+    page.sections = page.sections.map(normalizeBuilderSection);
+  });
+  if (!data.customization.aiAssistant) {
+    data.customization.aiAssistant = {
+      enabled: true,
+      name: "Nova",
+      greeting: "Hi! I am Nova, Tuur's portfolio assistant. Ask me about projects, skills, or contact info.",
+      startOpen: false,
+      mode: "web-llm",
+      localModel: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+      knowledgeNotes: ""
+    };
+  }
+  if (data.customization.aiAssistant.mode === "local-llm") data.customization.aiAssistant.mode = "web-llm";
+  if (!Array.isArray(data.customization.pageTemplates)) data.customization.pageTemplates = [];
+  if (!Array.isArray(data.customization.builderSectionPrefabs)) data.customization.builderSectionPrefabs = [];
+  data.customization.builderSectionPrefabs = data.customization.builderSectionPrefabs
+    .filter(function(p) { return p && p.section; })
+    .map(function(p) {
+      return { name:p.name || "Section Prefab", section:normalizeBuilderSection(p.section) };
+    });
+  if (!Array.isArray(data.customization.styleProfiles)) data.customization.styleProfiles = [];
+  if (!data.customization.styleProfiles.length) {
+    data.customization.styleProfiles = [
+      { id: "cyber-core", name: "Cyber Core", palette: JSON.parse(JSON.stringify(data.customization.palette)), fonts: JSON.parse(JSON.stringify(data.customization.fonts)) }
+    ];
+  }
+  if (!data.customization.currentStyleProfile) data.customization.currentStyleProfile = data.customization.styleProfiles[0].id;
+  if (!Array.isArray(data.customPages)) data.customPages = [];
+  data.customPages = data.customPages.map(function(p, i) {
+    var id = sanitizeSlug(p.id || ("custom-page-" + (i + 1)));
+    var blocks = Array.isArray(p.blocks) ? p.blocks : [];
+    if (!blocks.length && p.content) {
+      blocks = [{ type: "text", title: "Overview", body: p.content }];
+    }
+    return {
+      id: id || ("custom-page-" + (i + 1)),
+      title: p.title || "Custom Page",
+      navLabel: p.navLabel || p.title || "Page",
+      layout: p.layout || "stack",
+      visible: p.visible !== false,
+      styleProfile: p.styleProfile || "",
+      theme: p.theme || { inherit: true, primary: "", accent: "", card: "" },
+      content: p.content || "",
+      blocks: blocks.map(normalizePageBlock)
+    };
+  });
+  syncCustomizationFromProfile(false);
+  data.skills.forEach(function(cat) {
+    cat.items.forEach(function(item) {
+      if (typeof item.score !== "number") item.score = typeof item.pct === "number" ? +(item.pct / 20).toFixed(1) : 3;
+      item.score = Math.max(0, Math.min(5, +item.score || 0));
+    });
+  });
+}
+function getCurrentStyleProfile() {
+  var id = data.customization.currentStyleProfile;
+  var p = (data.customization.styleProfiles || []).find(function(sp) { return sp.id === id; });
+  return p || data.customization.styleProfiles[0];
+}
+function syncCustomizationFromProfile(mark) {
+  var p = getCurrentStyleProfile();
+  if (!p) return;
+  data.customization.palette = JSON.parse(JSON.stringify(p.palette));
+  data.customization.fonts = JSON.parse(JSON.stringify(p.fonts));
+  if (mark) onChange();
+}
+function persistCustomizationIntoProfile() {
+  var p = getCurrentStyleProfile();
+  if (!p) return;
+  p.palette = JSON.parse(JSON.stringify(data.customization.palette));
+  p.fonts = JSON.parse(JSON.stringify(data.customization.fonts));
+}
+function normalizePageBlock(block) {
+  block = block || {};
+  var t = block.type || "text";
+  if (t === "bullet") return { type: "bullet", title: block.title || "Highlights", items: Array.isArray(block.items) ? block.items : [""] };
+  if (t === "cta") return { type: "cta", title: block.title || "Call To Action", body: block.body || "", label: block.label || "Contact Me", href: block.href || "#contact" };
+  if (t === "stats") return { type: "stats", title: block.title || "Stats", items: Array.isArray(block.items) ? block.items : [{ label: "Years", value: "3+" }, { label: "Projects", value: "10+" }] };
+  if (t === "quote") return { type: "quote", title: block.title || "Quote", body: block.body || "A short proof point or testimonial.", label: block.label || "" };
+  if (t === "media") return { type: "media", title: block.title || "Media", src: block.src || "", alt: block.alt || "", caption: block.caption || "" };
+  if (t === "divider") return { type: "divider", title: block.title || "Divider" };
+  return { type: "text", title: block.title || "Section", body: block.body || "" };
+}
+function newPageBlock(type) {
+  return normalizePageBlock({ type:type });
+}
+function newBuilderSection(type, stableAnchor) {
+  var anchors = { hero:"home", "project-grid":"projects", skills:"skills", about:"about", contact:"contact", timeline:"timeline", testimonials:"testimonials", availability:"availability", recruiter:"recruiter" };
+  var id = stableAnchor ? (anchors[type] || type) : type + "-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 999);
+  var titles = {
+    hero:"Hero", "project-grid":"Projects", skills:"Skills", about:"About", contact:"Contact",
+    text:"Text Section", cta:"Call To Action", timeline:"Timeline", testimonials:"Testimonials",
+    availability:"Availability", recruiter:"Recruiter Snapshot"
+  };
+  return {
+    id:id, type:type, visible:true, navLabel:titles[type] || type,
+    settings:{ width:"boxed", padding:"normal", align:"left", background:"default", blockLayout:"grid", blockSurface:"card", theme:{ inherit:true, primary:"", accent:"", card:"", bg:"" } },
+    content:{ title:titles[type] || type, text:"", ctaLabel:"", ctaHref:"#contact" },
+    blocks:(type === "text" ? [newPageBlock("text")] : (type === "cta" ? [newPageBlock("cta")] : []))
+  };
+}
+function normalizeBuilderSection(sec) {
+  sec = sec || newBuilderSection("text");
+  if (!sec.id) sec.id = (sec.type || "section") + "-" + Date.now().toString(36);
+  if (!sec.type) sec.type = "text";
+  if (sec.visible !== false) sec.visible = true;
+  if (!sec.navLabel) sec.navLabel = sec.content && sec.content.title ? sec.content.title : sec.type;
+  if (!sec.settings) sec.settings = {};
+  if (!sec.content) sec.content = {};
+  if (!Array.isArray(sec.blocks)) {
+    sec.blocks = [];
+    if (["text","cta"].indexOf(sec.type) >= 0 && (sec.content.text || sec.content.ctaLabel)) {
+      sec.blocks.push(normalizePageBlock({ type:sec.type === "cta" ? "cta" : "text", title:sec.content.title, body:sec.content.text, label:sec.content.ctaLabel, href:sec.content.ctaHref }));
+    }
+  }
+  sec.blocks = sec.blocks.map(normalizePageBlock);
+  sec.settings.width = sec.settings.width || "boxed";
+  sec.settings.padding = sec.settings.padding || "normal";
+  sec.settings.align = sec.settings.align || "left";
+  sec.settings.background = sec.settings.background || "default";
+  sec.settings.blockLayout = sec.settings.blockLayout || "grid";
+  sec.settings.blockSurface = sec.settings.blockSurface || "card";
+  if (!sec.settings.theme) sec.settings.theme = { inherit:true, primary:"", accent:"", card:"", bg:"" };
+  if (sec.settings.theme.inherit !== false) sec.settings.theme.inherit = true;
+  sec.settings.theme.primary = sec.settings.theme.primary || "";
+  sec.settings.theme.accent = sec.settings.theme.accent || "";
+  sec.settings.theme.card = sec.settings.theme.card || "";
+  sec.settings.theme.bg = sec.settings.theme.bg || "";
+  sec.content.title = sec.content.title || sec.navLabel || sec.type;
+  return sec;
+}
 
 // ---- Undo / Redo -----------------------------------------------
 const MAX_HISTORY = 60;
@@ -627,6 +913,7 @@ function updateUndoRedo() {
 //  HELPERS
 // ================================================================
 function esc(s) { if (s == null) return ""; const d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
+function sel(value, expected) { return value === expected ? " selected" : ""; }
 
 function toast(msg, type) {
   type = type || "success";
@@ -680,21 +967,150 @@ function schedulePreviewRefresh() {
 // ================================================================
 function switchTab(tab) {
   currentTab = tab;
-  document.querySelectorAll(".sb-link").forEach(function(a) { a.classList.toggle("active", a.dataset.tab === tab); });
+  if (tab !== "builder") activeBuilderSectionIndex = null;
+  if (tab !== "pages") activeCustomPageIndex = null;
   render();
 }
 
 function render() {
   var m = document.getElementById("main");
-  var r = { hero: renderHero, projects: renderProjects, skills: renderSkills, about: renderAbout, contact: renderContact, meta: renderMeta };
+  var r = { hero: renderHero, builder: renderBuilder, projects: renderProjects, skills: renderSkills, about: renderAbout, contact: renderContact, pages: renderPages, extras: renderExtras, meta: renderMeta };
   m.innerHTML = (r[currentTab] || renderHero)();
+  renderSidebar();
+  populatePreviewStyleSelectors();
   bindDragDrop();
   restoreOpenCards();
+  if (currentTab === "builder" && activeBuilderSectionIndex != null) {
+    var card = m.querySelector('[data-builder-section-index="' + activeBuilderSectionIndex + '"]');
+    if (card) {
+      var body = card.querySelector(".e-card-body");
+      var chev = card.querySelector(".chevron");
+      if (body) body.classList.add("open");
+      if (chev) chev.classList.add("open");
+      setTimeout(function() { card.scrollIntoView({ block:"start", behavior:"smooth" }); }, 0);
+    }
+  }
+  if (currentTab === "pages" && activeCustomPageIndex != null) {
+    var pageCard = m.querySelector('[data-custom-page-index="' + activeCustomPageIndex + '"]');
+    if (pageCard) {
+      var pageBody = pageCard.querySelector(".e-card-body");
+      var pageChev = pageCard.querySelector(".chevron");
+      if (pageBody) pageBody.classList.add("open");
+      if (pageChev) pageChev.classList.add("open");
+      setTimeout(function() { pageCard.scrollIntoView({ block:"start", behavior:"smooth" }); }, 0);
+    }
+  }
   if (focusAfterRender) {
     var el = m.querySelector(focusAfterRender);
     if (el) { el.focus(); el.value = ""; }
     focusAfterRender = null;
   }
+}
+
+function renderSidebar() {
+  var side = document.getElementById("sidebar-dynamic");
+  if (!side) return;
+  var sections = data.pages && data.pages[0] && Array.isArray(data.pages[0].sections) ? data.pages[0].sections : [];
+  var pages = Array.isArray(data.customPages) ? data.customPages : [];
+  var html = sidebarButton("builder", "Builder", sidebarIcon("builder"), "switchTab('builder')", currentTab === "builder" && activeBuilderSectionIndex == null, "Builder") +
+    sidebarLabel("Homepage", "addBuilderSectionFromSidebar()", "Add homepage section") +
+    sections.map(function(sec, i) {
+      var label = sec.navLabel || (sec.content && sec.content.title) || formatSectionType(sec.type);
+      var cls = "sb-section" + (sec.visible === false ? " sb-hidden" : "");
+      return sidebarButton("builder-section-" + i, label, sidebarIcon("section"), "openBuilderSection(" + i + ")", currentTab === "builder" && activeBuilderSectionIndex === i, label, cls);
+    }).join("") +
+    '<div class="sb-sep"></div>' +
+    sidebarButton("pages", "Pages", sidebarIcon("pages"), "switchTab('pages')", currentTab === "pages" && activeCustomPageIndex == null, "Pages") +
+    sidebarLabel("Custom Pages", "addCustomPageFromSidebar()", "Add custom page") +
+    (pages.length ? pages.map(function(p, i) {
+      var label = p.navLabel || p.title || "Page";
+      var cls = "sb-section" + (p.visible === false ? " sb-hidden" : "");
+      return sidebarButton("custom-page-" + i, label, sidebarIcon("page"), "openCustomPage(" + i + ")", currentTab === "pages" && activeCustomPageIndex === i, label, cls);
+    }).join("") : "") +
+    '<div class="sb-sep"></div>' +
+    sidebarButton("extras", "Extras", sidebarIcon("extras"), "switchTab('extras')", currentTab === "extras", "Extras") +
+    sidebarButton("projects", "Project Data", sidebarIcon("projects"), "switchTab('projects')", currentTab === "projects", "Project Data") +
+    sidebarButton("skills", "Skill Data", sidebarIcon("skills"), "switchTab('skills')", currentTab === "skills", "Skill Data") +
+    sidebarButton("hero", "Hero Data", sidebarIcon("hero"), "switchTab('hero')", currentTab === "hero", "Hero Data") +
+    '<div class="sb-sep"></div>' +
+    sidebarButton("meta", "Settings", sidebarIcon("settings"), "switchTab('meta')", currentTab === "meta", "Settings");
+  side.innerHTML = html;
+}
+
+function sidebarButton(tab, label, icon, action, active, tooltip, extraClass) {
+  return '<button class="sb-link ' + (extraClass || "") + (active ? " active" : "") + '" data-tab="' + esc(tab) + '" data-tooltip="' + esc(tooltip || label) + '" onclick="' + action + '">' + icon + '<span>' + esc(label) + '</span></button>';
+}
+
+function sidebarLabel(label, action, tooltip) {
+  return '<div class="sb-label-row"><span class="sb-label">' + esc(label) + '</span><button class="sb-mini" title="' + esc(tooltip || "Add") + '" onclick="' + action + '">+</button></div>';
+}
+
+function sidebarIcon(type) {
+  var icons = {
+    builder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="6"/><rect x="3" y="11" width="8" height="10"/><rect x="13" y="11" width="8" height="10"/></svg>',
+    section:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>',
+    pages:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M9 4v16"/><path d="M9 9h11"/></svg>',
+    page:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/></svg>',
+    extras:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m4.9 4.9 14.2 14.2"/><path d="m19.1 4.9-14.2 14.2"/></svg>',
+    projects:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+    skills:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+    hero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2m-9-11h2m18 0h2m-3.3-6.7-1.4 1.4M6.7 17.3l-1.4 1.4m0-13.4 1.4 1.4m10.6 10.6 1.4 1.4"/></svg>'
+  };
+  return icons[type] || icons.section;
+}
+
+function openBuilderSection(i) {
+  currentTab = "builder";
+  activeBuilderSectionIndex = i;
+  activeCustomPageIndex = null;
+  openCards.add("pages.0.sections-" + i);
+  render();
+}
+
+function openCustomPage(i) {
+  currentTab = "pages";
+  activeCustomPageIndex = i;
+  activeBuilderSectionIndex = null;
+  openCards.add("customPages-" + i);
+  render();
+}
+
+function addBuilderSectionFromSidebar() {
+  var section = newBuilderSection("text");
+  section.navLabel = "New Section";
+  section.content.title = "New Section";
+  data.pages[0].sections.push(section);
+  var idx = data.pages[0].sections.length - 1;
+  currentTab = "builder";
+  activeBuilderSectionIndex = idx;
+  activeCustomPageIndex = null;
+  openCards.add("pages.0.sections-" + idx);
+  onChange();
+  render();
+}
+
+function addCustomPageFromSidebar() {
+  var slug = "new-page-" + Date.now().toString().slice(-4);
+  data.customPages.push({
+    id:slug,
+    title:"New Custom Page",
+    navLabel:"New Page",
+    layout:"stack",
+    visible:true,
+    theme:{ inherit:true, primary:"", accent:"", card:"" },
+    content:"Write your story here.",
+    blocks:[newPageBlock("text")]
+  });
+  var idx = data.customPages.length - 1;
+  data.customPages[idx].blocks[0].title = "Overview";
+  data.customPages[idx].blocks[0].body = "Write your story here.";
+  currentTab = "pages";
+  activeCustomPageIndex = idx;
+  activeBuilderSectionIndex = null;
+  openCards.add("customPages-" + idx);
+  onChange();
+  render();
 }
 
 function restoreOpenCards() {
@@ -743,6 +1159,308 @@ function bindDragDrop() {
 
 function resolveKey(key) {
   return key.split(".").reduce(function(o, k) { return o[/^\d+$/.test(k) ? +k : k]; }, data);
+}
+
+
+// ================================================================
+//  BUILDER TAB
+// ================================================================
+function renderBuilder() {
+  var page = data.pages[0];
+  return '<div class="sec-head"><h2>Builder</h2><span class="badge">' + page.sections.length + ' sections</span></div>' +
+    '<div class="field"><label>Homepage Title</label><input value="' + esc(page.title || "Home") + '" oninput="data.pages[0].title=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Section Templates</label><div class="field-hint">Fast page chunks that are built from normal editable sections and blocks.</div>' +
+    '<div class="preset-row">' +
+    '<button class="btn btn-sm" onclick="addBuilderTemplate(\'proof-grid\')">+ Proof Grid</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderTemplate(\'process\')">+ Process</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderTemplate(\'faq\')">+ FAQ</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderTemplate(\'spotlight-cta\')">+ Spotlight CTA</button>' +
+    '</div></div>' +
+    renderBuilderPrefabLibrary() +
+    '<div class="field"><label>Add Section</label><div class="field-hint">This is the new engine-style page stack. Drag sections to reorder, hide them, duplicate them, or swap their type.</div>' +
+    '<div class="preset-row">' + BUILDER_SECTION_TYPES.map(function(t) {
+      return '<button class="btn btn-sm" onclick="addBuilderSection(\'' + t + '\')">+ ' + esc(formatSectionType(t)) + '</button>';
+    }).join("") + '</div></div>' +
+    page.sections.map(function(sec, i) { return renderBuilderSection(sec, i); }).join("") +
+    (page.sections.length ? "" : '<div style="text-align:center;padding:40px;color:var(--muted)">No sections yet. Add a Hero, Project Grid, Skills, Text, or CTA block.</div>');
+}
+
+function renderBuilderPrefabLibrary() {
+  var prefabs = data.customization.builderSectionPrefabs || [];
+  if (!prefabs.length) return '<div class="field-hint" style="margin-bottom:12px">No saved Builder section prefabs yet. Save any section as a prefab to reuse it here.</div>';
+  return '<div class="field"><label>Saved Builder Prefabs</label>' + prefabs.map(function(p, i) {
+    return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">' +
+      '<span class="tiny" style="flex:1">' + esc(p.name || "Section Prefab") + ' <span style="opacity:.65">/ ' + esc(formatSectionType(p.section && p.section.type || "section")) + '</span></span>' +
+      '<button class="btn btn-sm btn-ghost" onclick="insertBuilderSectionPrefab(' + i + ')">Insert</button>' +
+      '<button class="btn btn-sm btn-ghost" onclick="renameBuilderSectionPrefab(' + i + ')">Rename</button>' +
+      '<button class="btn btn-sm btn-danger btn-ghost" onclick="deleteBuilderSectionPrefab(' + i + ')">Delete</button></div>';
+  }).join("") + '</div>';
+}
+
+function renderBuilderSection(sec, i) {
+  sec = normalizeBuilderSection(sec);
+  var body =
+    '<div class="field-row"><div class="field"><label>Type</label><select onchange="data.pages[0].sections[' + i + '].type=this.value;onChange();render()">' +
+    BUILDER_SECTION_TYPES.map(function(t) { return '<option value="' + t + '"' + (sec.type === t ? " selected" : "") + '>' + esc(formatSectionType(t)) + '</option>'; }).join("") +
+    '</select></div><div class="field"><label>Visible</label><select onchange="data.pages[0].sections[' + i + '].visible=this.value===\'true\';onChange();render()"><option value="true"' + (sec.visible !== false ? " selected" : "") + '>Visible</option><option value="false"' + (sec.visible === false ? " selected" : "") + '>Hidden</option></select></div></div>' +
+    '<div class="field-row"><div class="field"><label>Navigation Label</label><input value="' + esc(sec.navLabel || "") + '" oninput="data.pages[0].sections[' + i + '].navLabel=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Anchor ID</label><input value="' + esc(sec.id || "") + '" oninput="data.pages[0].sections[' + i + '].id=sanitizeSlug(this.value);onChange()"/></div></div>' +
+    '<div class="field-row"><div class="field"><label>Width</label><select onchange="data.pages[0].sections[' + i + '].settings.width=this.value;onChange()"><option value="boxed"' + sel(sec.settings.width,"boxed") + '>Boxed</option><option value="wide"' + sel(sec.settings.width,"wide") + '>Wide</option><option value="full"' + sel(sec.settings.width,"full") + '>Full</option></select></div>' +
+    '<div class="field"><label>Padding</label><select onchange="data.pages[0].sections[' + i + '].settings.padding=this.value;onChange()"><option value="compact"' + sel(sec.settings.padding,"compact") + '>Compact</option><option value="normal"' + sel(sec.settings.padding,"normal") + '>Normal</option><option value="large"' + sel(sec.settings.padding,"large") + '>Large</option></select></div></div>' +
+    '<div class="field-row"><div class="field"><label>Text Align</label><select onchange="data.pages[0].sections[' + i + '].settings.align=this.value;onChange()"><option value="left"' + sel(sec.settings.align,"left") + '>Left</option><option value="center"' + sel(sec.settings.align,"center") + '>Center</option><option value="right"' + sel(sec.settings.align,"right") + '>Right</option></select></div>' +
+    '<div class="field"><label>Background</label><select onchange="data.pages[0].sections[' + i + '].settings.background=this.value;onChange()"><option value="default"' + sel(sec.settings.background,"default") + '>Default</option><option value="card"' + sel(sec.settings.background,"card") + '>Card</option><option value="accent"' + sel(sec.settings.background,"accent") + '>Accent</option><option value="grid"' + sel(sec.settings.background,"grid") + '>Grid</option></select></div></div>' +
+    '<div class="field-row"><div class="field"><label>Block Layout</label><select onchange="data.pages[0].sections[' + i + '].settings.blockLayout=this.value;onChange()"><option value="grid"' + sel(sec.settings.blockLayout,"grid") + '>Responsive Grid</option><option value="stack"' + sel(sec.settings.blockLayout,"stack") + '>Stack</option><option value="split"' + sel(sec.settings.blockLayout,"split") + '>Split Feature</option><option value="rail"' + sel(sec.settings.blockLayout,"rail") + '>Horizontal Rail</option></select></div>' +
+    '<div class="field"><label>Block Surface</label><select onchange="data.pages[0].sections[' + i + '].settings.blockSurface=this.value;onChange()"><option value="card"' + sel(sec.settings.blockSurface,"card") + '>Cards</option><option value="plain"' + sel(sec.settings.blockSurface,"plain") + '>Plain</option><option value="glass"' + sel(sec.settings.blockSurface,"glass") + '>Glass</option><option value="outline"' + sel(sec.settings.blockSurface,"outline") + '>Outline</option></select></div></div>' +
+    renderBuilderSectionThemeEditor(i, sec) +
+    renderBuilderContentEditor(sec, i) +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" onclick="duplicateBuilderSection(' + i + ')">Duplicate</button>' +
+    '<button class="btn btn-sm" onclick="saveBuilderSectionPrefab(' + i + ')">Save as Prefab</button>' +
+    '<button class="btn btn-sm" onclick="moveBuilderSection(' + i + ',-1)">Move Up</button><button class="btn btn-sm" onclick="moveBuilderSection(' + i + ',1)">Move Down</button>' +
+    '<button class="btn btn-sm btn-danger" onclick="data.pages[0].sections.splice(' + i + ',1);onChange();render()">Delete</button></div>';
+  return '<div class="e-card" data-draggable data-builder-section-index="' + i + '" data-idx="' + i + '" data-list="pages.0.sections">' +
+    '<div class="e-card-head" onclick="toggleCard(this)"><div class="drag-handle">\u2807</div><strong>' + esc(sec.navLabel || formatSectionType(sec.type)) + '</strong><span class="badge">' + esc(formatSectionType(sec.type)) + '</span><span class="spacer"></span><span class="chevron">⌄</span></div>' +
+    '<div class="e-card-body">' + body + '</div></div>';
+}
+
+function renderBuilderContentEditor(sec, i) {
+  var prefix = "data.pages[0].sections[" + i + "].content";
+  var blocks = sec.blocks || [];
+  return '<div class="field"><label>Title Override</label><input value="' + esc(sec.content.title || "") + '" oninput="' + prefix + '.title=this.value;onChange()"/><div class="field-hint">Leave this close to the section purpose for clean navigation and page structure.</div></div>' +
+    '<div class="field"><label>Section Blocks</label><div class="field-hint">Add optional child components inside this section. Built-in sections keep their normal content, then render these blocks underneath.</div>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'text\')">+ Text</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'bullet\')">+ Bullets</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'cta\')">+ CTA</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'stats\')">+ Stats</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'quote\')">+ Quote</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'media\')">+ Media</button>' +
+    '<button class="btn btn-sm" onclick="addBuilderBlock(' + i + ',\'divider\')">+ Divider</button>' +
+    '</div></div>' +
+    blocks.map(function(b, bi) { return renderBuilderBlockEditor(i, bi, b); }).join("") +
+    (blocks.length ? "" : '<div class="field-hint">No child blocks yet. Add one from the section block library.</div>');
+}
+
+function renderBuilderSectionThemeEditor(i, sec) {
+  var t = sec.settings.theme || { inherit:true, primary:"", accent:"", card:"", bg:"" };
+  return '<div class="field"><label>Section Theme Override</label>' +
+    '<div class="toggle-row"><button class="toggle' + (t.inherit !== false ? " on" : "") + '" onclick="toggleBuilderSectionTheme(' + i + ',this)"></button><span class="toggle-label">Inherit global theme</span></div>' +
+    '<div class="palette-grid">' +
+    renderBuilderThemeChip(i, "primary", "Primary", t.primary || "") +
+    renderBuilderThemeChip(i, "accent", "Accent", t.accent || "") +
+    renderBuilderThemeChip(i, "card", "Card", t.card || "") +
+    renderBuilderThemeChip(i, "bg", "Background", t.bg || "") +
+    '</div></div>';
+}
+
+function renderBuilderThemeChip(i, key, label, value) {
+  return '<div class="color-chip"><input type="color" value="' + esc(value || "#2dd4bf") + '" oninput="data.pages[0].sections[' + i + '].settings.theme.' + key + '=this.value;data.pages[0].sections[' + i + '].settings.theme.inherit=false;onChange()"/>' +
+    '<div><div style="font-size:12px">' + esc(label) + '</div><div class="tiny">' + esc(value || "inherit") + '</div></div></div>';
+}
+
+function renderBuilderBlockEditor(si, bi, b) {
+  return renderContentBlockEditor("data.pages[0].sections[" + si + "].blocks", "pages.0.sections." + si + ".blocks", bi, b, "removeBuilderBlock(" + si + "," + bi + ")", "duplicateBuilderBlock(" + si + "," + bi + ")");
+}
+
+function renderContentBlockEditor(listExpr, listKey, bi, b, removeCall, duplicateCall) {
+  var item = listExpr + "[" + bi + "]";
+  var base = '<div class="sec-block" data-draggable data-idx="' + bi + '" data-list="' + esc(listKey) + '">' +
+    '<div class="sec-block-head"><div class="drag-handle">\u2807</div>' +
+    '<span style="font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--primary)">' + esc((b.type || "text").toUpperCase()) + '</span>' +
+    '<span style="flex:1"></span><button class="btn btn-sm btn-ghost" onclick="' + duplicateCall + '">Duplicate</button>' +
+    '<button class="btn btn-sm btn-danger btn-ghost" onclick="' + removeCall + '">\u2715</button></div>';
+  if (b.type === "bullet") {
+    return base +
+      '<div class="field"><label>Block Title</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div>' +
+      (b.items || []).map(function(it, ii) {
+        return '<div class="bullet-row"><input value="' + esc(it) + '" oninput="' + item + '.items[' + ii + ']=this.value;onChange()"/>' +
+          '<button class="bullet-del" onclick="' + item + '.items.splice(' + ii + ',1);onChange();render()">\u2715</button></div>';
+      }).join("") +
+      '<button class="btn btn-sm btn-ghost" onclick="' + item + '.items.push(\'\');onChange();render()">+ Bullet</button></div>';
+  }
+  if (b.type === "cta") {
+    return base +
+      '<div class="field"><label>Block Title</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div>' +
+      '<div class="field"><label>Description</label><textarea rows="2" oninput="' + item + '.body=this.value;onChange()">' + esc(b.body || "") + '</textarea></div>' +
+      '<div class="field-row"><div class="field"><label>Button Label</label><input value="' + esc(b.label || "") + '" oninput="' + item + '.label=this.value;onChange()"/></div>' +
+      '<div class="field"><label>Button Link</label><input value="' + esc(b.href || "") + '" oninput="' + item + '.href=this.value;onChange()"/></div></div></div>';
+  }
+  if (b.type === "stats") {
+    return base +
+      '<div class="field"><label>Block Title</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div>' +
+      (b.items || []).map(function(st, si) {
+        return '<div class="field-row"><div class="field"><label>Label</label><input value="' + esc(st.label || "") + '" oninput="' + item + '.items[' + si + '].label=this.value;onChange()"/></div>' +
+          '<div class="field"><label>Value</label><input value="' + esc(st.value || "") + '" oninput="' + item + '.items[' + si + '].value=this.value;onChange()"/></div>' +
+          '<button class="btn btn-sm btn-danger btn-ghost" style="margin-top:18px" onclick="' + item + '.items.splice(' + si + ',1);onChange();render()">\u2715</button></div>';
+      }).join("") +
+      '<button class="btn btn-sm btn-ghost" onclick="' + item + '.items.push({label:\'New\',value:\'0\'});onChange();render()">+ Stat</button></div>';
+  }
+  if (b.type === "quote") {
+    return base +
+      '<div class="field"><label>Quote Title</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div>' +
+      '<div class="field"><label>Quote</label><textarea rows="3" oninput="' + item + '.body=this.value;onChange()">' + esc(b.body || "") + '</textarea></div>' +
+      '<div class="field"><label>Attribution</label><input value="' + esc(b.label || "") + '" oninput="' + item + '.label=this.value;onChange()"/></div></div>';
+  }
+  if (b.type === "media") {
+    return base +
+      '<div class="field"><label>Block Title</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div>' +
+      '<div class="field"><label>Image / Video Path</label><input value="' + esc(b.src || "") + '" oninput="' + item + '.src=this.value;onChange()"/></div>' +
+      '<div class="field-row"><div class="field"><label>Alt Text</label><input value="' + esc(b.alt || "") + '" oninput="' + item + '.alt=this.value;onChange()"/></div>' +
+      '<div class="field"><label>Caption</label><input value="' + esc(b.caption || "") + '" oninput="' + item + '.caption=this.value;onChange()"/></div></div></div>';
+  }
+  if (b.type === "divider") {
+    return base + '<div class="field"><label>Label</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div></div>';
+  }
+  return base +
+    '<div class="field"><label>Block Title</label><input value="' + esc(b.title || "") + '" oninput="' + item + '.title=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Content</label><textarea rows="4" oninput="' + item + '.body=this.value;onChange()">' + esc(b.body || "") + '</textarea></div></div>';
+}
+
+function addBuilderSection(type) {
+  data.pages[0].sections.push(newBuilderSection(type));
+  activeBuilderSectionIndex = data.pages[0].sections.length - 1;
+  openCards.add("pages.0.sections-" + activeBuilderSectionIndex);
+  onChange();
+  render();
+}
+function addBuilderTemplate(kind) {
+  var sections = createBuilderTemplate(kind);
+  data.pages[0].sections = data.pages[0].sections.concat(sections);
+  onChange();
+  render();
+  toast("Template added");
+}
+function createBuilderTemplate(kind) {
+  if (kind === "process") {
+    var s = newBuilderSection("text");
+    s.navLabel = "Process";
+    s.content.title = "Process";
+    s.settings.blockLayout = "grid";
+    s.settings.background = "grid";
+    s.blocks = [
+      { type:"text", title:"01 - Discover", body:"Define the goal, constraints, audience, and the strongest proof to show." },
+      { type:"text", title:"02 - Build", body:"Turn the idea into a focused playable or interactive implementation." },
+      { type:"text", title:"03 - Polish", body:"Tune the feel, presentation, performance, and story around the result." }
+    ].map(normalizePageBlock);
+    return [s];
+  }
+  if (kind === "faq") {
+    var f = newBuilderSection("text");
+    f.navLabel = "FAQ";
+    f.content.title = "FAQ";
+    f.settings.blockLayout = "stack";
+    f.blocks = [
+      { type:"text", title:"What kind of work is this portfolio best for?", body:"Gameplay programming, AI systems, tools, and interactive technical projects." },
+      { type:"text", title:"Can this section be edited?", body:"Yes. Every question is just a normal text block inside the Builder." },
+      { type:"cta", title:"Still have questions?", body:"Use the contact section to reach out directly.", label:"Contact", href:"#contact" }
+    ].map(normalizePageBlock);
+    return [f];
+  }
+  if (kind === "spotlight-cta") {
+    var c = newBuilderSection("cta");
+    c.navLabel = "Spotlight";
+    c.content.title = "Project Spotlight";
+    c.settings.blockLayout = "split";
+    c.settings.background = "accent";
+    c.blocks = [
+      { type:"text", title:"Why this matters", body:"Use this space to highlight a standout project, system, result, or recruiter-facing achievement." },
+      { type:"cta", title:"Explore the work", body:"Point visitors to the strongest proof page or project detail.", label:"View Projects", href:"#projects" }
+    ].map(normalizePageBlock);
+    return [c];
+  }
+  var p = newBuilderSection("text");
+  p.navLabel = "Proof";
+  p.content.title = "Proof Grid";
+  p.settings.blockLayout = "grid";
+  p.settings.background = "card";
+  p.blocks = [
+    { type:"stats", title:"Snapshot", items:[{ label:"Projects", value:"10+" }, { label:"Focus", value:"AI" }, { label:"Engine", value:"Unity" }] },
+    { type:"bullet", title:"Strengths", items:["Gameplay systems", "AI behavior", "Fast prototyping"] },
+    { type:"quote", title:"Positioning", body:"A compact section for achievements, proof points, or testimonials.", label:"Portfolio note" }
+  ].map(normalizePageBlock);
+  return [p];
+}
+function toggleBuilderSectionTheme(i, btn) {
+  var t = data.pages[0].sections[i].settings.theme;
+  t.inherit = !(t.inherit !== false);
+  btn.classList.toggle("on", t.inherit !== false);
+  onChange();
+}
+function addBuilderBlock(si, type) {
+  data.pages[0].sections[si].blocks = data.pages[0].sections[si].blocks || [];
+  data.pages[0].sections[si].blocks.push(newPageBlock(type));
+  onChange();
+  render();
+}
+function removeBuilderBlock(si, bi) {
+  data.pages[0].sections[si].blocks.splice(bi, 1);
+  onChange();
+  render();
+}
+function duplicateBuilderBlock(si, bi) {
+  var copy = JSON.parse(JSON.stringify(data.pages[0].sections[si].blocks[bi]));
+  data.pages[0].sections[si].blocks.splice(bi + 1, 0, copy);
+  onChange();
+  render();
+}
+function duplicateBuilderSection(i) {
+  var copy = JSON.parse(JSON.stringify(data.pages[0].sections[i]));
+  copy.id = sanitizeSlug((copy.id || copy.type) + "-copy-" + Date.now().toString(36));
+  data.pages[0].sections.splice(i + 1, 0, copy);
+  onChange();
+  render();
+}
+function saveBuilderSectionPrefab(i) {
+  var sec = normalizeBuilderSection(JSON.parse(JSON.stringify(data.pages[0].sections[i])));
+  var name = prompt("Builder prefab name:", (sec.content && sec.content.title ? sec.content.title : sec.navLabel || "Section") + " Prefab");
+  if (!name) return;
+  data.customization.builderSectionPrefabs.push({
+    name:name,
+    section:sec
+  });
+  onChange();
+  render();
+  toast("Builder prefab saved");
+}
+function insertBuilderSectionPrefab(pi) {
+  var prefab = data.customization.builderSectionPrefabs[pi];
+  if (!prefab || !prefab.section) return;
+  var section = prepareInsertedBuilderSection(prefab.section);
+  data.pages[0].sections.push(section);
+  onChange();
+  render();
+  toast("Builder prefab inserted");
+}
+function renameBuilderSectionPrefab(pi) {
+  var prefab = data.customization.builderSectionPrefabs[pi];
+  if (!prefab) return;
+  var name = prompt("Prefab name:", prefab.name || "Section Prefab");
+  if (!name) return;
+  prefab.name = name;
+  onChange();
+  render();
+}
+function deleteBuilderSectionPrefab(pi) {
+  data.customization.builderSectionPrefabs.splice(pi, 1);
+  onChange();
+  render();
+}
+function prepareInsertedBuilderSection(source) {
+  var section = normalizeBuilderSection(JSON.parse(JSON.stringify(source)));
+  var base = sanitizeSlug(section.id || section.type || "section") || "section";
+  section.id = base + "-" + Date.now().toString(36);
+  section.visible = true;
+  section.blocks = (section.blocks || []).map(normalizePageBlock);
+  return section;
+}
+function moveBuilderSection(i, dir) {
+  var target = i + dir;
+  if (target < 0 || target >= data.pages[0].sections.length) return;
+  data.pages[0].sections.splice(target, 0, data.pages[0].sections.splice(i, 1)[0]);
+  onChange();
+  render();
+}
+function formatSectionType(type) {
+  return String(type || "").replace(/-/g, " ").replace(/\b\w/g, function(c) { return c.toUpperCase(); });
 }
 
 
@@ -880,7 +1598,6 @@ function renderColEditor(pi, si, ci, col) {
     body + '</div>';
 }
 
-
 // ================================================================
 //  SKILLS TAB
 // ================================================================
@@ -896,14 +1613,21 @@ function renderSkills() {
         '<div class="e-card-body">' +
         '<div class="field"><label>Category Name</label><input value="' + esc(cat.category) + '" oninput="data.skills[' + ci + '].category=this.value;onChange()"/></div>' +
         cat.items.map(function(s, si) {
+          var score = +s.score || 0;
           return '<div class="sk-row" data-draggable data-idx="' + si + '" data-list="skills.' + ci + '.items">' +
             '<div class="drag-handle">\u2807</div>' +
             '<input class="sk-name-input" value="' + esc(s.name) + '" oninput="data.skills[' + ci + '].items[' + si + '].name=this.value;onChange()"/>' +
-            '<input type="range" class="sk-slider" min="0" max="100" value="' + s.pct + '" oninput="data.skills[' + ci + '].items[' + si + '].pct=+this.value;this.nextElementSibling.textContent=this.value+\'%\';onChange()"/>' +
-            '<span class="sk-pct">' + s.pct + '%</span>' +
+            '<div class="sk-score-wrap">' +
+            '<input type="number" class="sk-score" min="0" max="5" step="0.5" value="' + score.toFixed(1) + '" oninput="setSkillScore(' + ci + ',' + si + ',this.value)"/>' +
+            '<div class="sk-score-pills">' +
+            [1,2,3,4,5].map(function(v) {
+              var cls = score >= v ? "active" : (score >= v - 0.5 ? "half" : "");
+              return '<span class="sk-pill ' + cls + '" onclick="setSkillScore(' + ci + ',' + si + ',' + v + ')"></span>';
+            }).join("") +
+            '</div></div>' +
             '<button class="sk-del" onclick="data.skills[' + ci + '].items.splice(' + si + ',1);onChange();render()">\u2715</button></div>';
         }).join("") +
-        '<button class="btn btn-sm" onclick="data.skills[' + ci + '].items.push({name:\'New Skill\',pct:50});onChange();render()">+ Skill</button></div>' +
+        '<button class="btn btn-sm" onclick="data.skills[' + ci + '].items.push({name:\'New Skill\',score:3});onChange();render()">+ Skill</button></div>' +
         '<div class="e-card-foot"><span style="flex:1"></span>' +
         '<button class="btn btn-sm btn-danger btn-ghost" onclick="if(confirm(\'Delete?\')){data.skills.splice(' + ci + ',1);onChange();render()}">Delete</button></div></div>';
     }).join("");
@@ -972,13 +1696,187 @@ function renderContact() {
 
 
 // ================================================================
+//  PAGES TAB
+// ================================================================
+function renderPages() {
+  var pages = data.customPages || [];
+  return '<div class="sec-head"><h2>Custom Pages / Sections</h2><span class="badge">' + pages.length + '</span><span class="spacer"></span>' +
+    '<button class="btn btn-primary" onclick="addCustomPage()">+ New Page</button></div>' +
+    '<div class="field-hint" style="margin-bottom:12px">Each page is like a scene: add blocks/components and compose a full section with drag-and-drop.</div>' +
+    pages.map(function(p, i) {
+      return '<div class="e-card" data-draggable data-custom-page-index="' + i + '" data-idx="' + i + '" data-list="customPages">' +
+        '<div class="e-card-head" onclick="toggleCard(this)"><div class="drag-handle">\u2807</div>' +
+        '<span class="e-card-title">' + esc(p.title || "Untitled") + '</span>' +
+        '<span class="e-card-sub">#' + esc(p.id || "") + '</span><span class="chevron">\u25B8</span></div>' +
+        '<div class="e-card-body">' +
+        '<div class="field-row"><div class="field"><label>Page Title</label><input value="' + esc(p.title || "") + '" oninput="data.customPages[' + i + '].title=this.value;onChange()"/></div>' +
+        '<div class="field"><label>Nav Label</label><input value="' + esc(p.navLabel || "") + '" oninput="data.customPages[' + i + '].navLabel=this.value;onChange()"/></div></div>' +
+        '<div class="toggle-row"><button class="toggle' + (p.visible !== false ? " on" : "") + '" onclick="data.customPages[' + i + '].visible=!(data.customPages[' + i + '].visible!==false);this.classList.toggle(\'on\');onChange()"></button><span class="toggle-label">Visible in site/nav</span></div>' +
+        '<div class="field"><label>Slug ID</label><input value="' + esc(p.id || "") + '" style="font-family:var(--mono)" oninput="data.customPages[' + i + '].id=sanitizeSlug(this.value);this.value=data.customPages[' + i + '].id;onChange()"/>' +
+        '<div class="field-hint">Used in URL hash and tab links (example: #gameplay-lab).</div></div>' +
+        '<div class="field"><label>Layout</label><select onchange="data.customPages[' + i + '].layout=this.value;onChange()">' +
+        '<option value="stack"' + (p.layout === "stack" ? " selected" : "") + '>Stack</option>' +
+        '<option value="grid"' + (p.layout === "grid" ? " selected" : "") + '>Two-Column Grid</option>' +
+        '</select></div>' +
+        '<div class="field"><label>Style Profile</label><select onchange="data.customPages[' + i + '].styleProfile=this.value;onChange()">' +
+        '<option value="">Global Active</option>' + renderStyleProfileOptions(p.styleProfile || "") +
+        '</select><div class="field-hint">Apply another saved style identity to this page only.</div></div>' +
+        '<div class="field"><label>Page Theme Override</label>' +
+        '<div class="toggle-row"><button class="toggle' + (p.theme && p.theme.inherit !== false ? " on" : "") + '" onclick="togglePageThemeInherit(' + i + ',this)"></button><span class="toggle-label">Inherit global theme</span></div>' +
+        '<div class="palette-grid">' +
+        renderPageThemeChip(i,"primary","Primary",(p.theme&&p.theme.primary)||"") +
+        renderPageThemeChip(i,"accent","Accent",(p.theme&&p.theme.accent)||"") +
+        renderPageThemeChip(i,"card","Card",(p.theme&&p.theme.card)||"") +
+        '</div></div>' +
+        '<div class="field"><label>Component Library</label><div style="display:flex;gap:6px;flex-wrap:wrap">' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'text\')">+ Text Block</button>' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'bullet\')">+ Bullet Block</button>' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'cta\')">+ CTA Block</button>' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'stats\')">+ Stats Block</button>' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'quote\')">+ Quote Block</button>' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'media\')">+ Media Block</button>' +
+        '<button class="btn btn-sm" onclick="addPageBlock(' + i + ',\'divider\')">+ Divider</button>' +
+        '<button class="btn btn-sm" onclick="savePageTemplate(' + i + ')">Save as Prefab</button>' +
+        '</div></div>' +
+        renderTemplateLibrary(i) +
+        (p.blocks || []).map(function(b, bi) { return renderPageBlockEditor(i, bi, b); }).join("") +
+        ((p.blocks || []).length ? "" : '<div class="field-hint">No blocks yet. Add one from the library.</div>') +
+        '</div>' +
+        '<div class="e-card-foot"><button class="btn btn-sm btn-ghost" onclick="duplicateCustomPage(' + i + ')">Duplicate</button><span style="flex:1"></span>' +
+        '<button class="btn btn-sm btn-danger btn-ghost" onclick="if(confirm(\'Delete this custom page?\')){data.customPages.splice(' + i + ',1);onChange();render()}">Delete</button></div></div>';
+    }).join("") +
+    (pages.length ? "" : '<div style="text-align:center;padding:30px;color:var(--muted)">No custom pages yet.</div>');
+}
+
+// ================================================================
+//  EXTRAS TAB
+// ================================================================
+function renderExtras() {
+  var a = data.availability;
+  var r = data.recruiterMode;
+  return '<div class="sec-head"><h2>Portfolio Extras</h2><span class="badge">optional modules</span></div>' +
+    '<div class="e-card"><div class="e-card-body open">' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--primary)">Availability Banner</h3>' +
+    '<div class="toggle-row"><button class="toggle' + (a.enabled ? " on" : "") + '" onclick="data.availability.enabled=!data.availability.enabled;this.classList.toggle(\'on\');onChange()"></button><span class="toggle-label">Show availability banner</span></div>' +
+    '<div class="field"><label>Text</label><input value="' + esc(a.text || "") + '" oninput="data.availability.text=this.value;onChange()"/></div>' +
+    '<div class="field-row"><div class="field"><label>CTA Label</label><input value="' + esc(a.ctaLabel || "") + '" oninput="data.availability.ctaLabel=this.value;onChange()"/></div>' +
+    '<div class="field"><label>CTA Link</label><input value="' + esc(a.ctaHref || "") + '" oninput="data.availability.ctaHref=this.value;onChange()"/></div></div></div></div>' +
+    '<div class="e-card"><div class="e-card-body open">' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--primary)">Recruiter Mode</h3>' +
+    '<div class="toggle-row"><button class="toggle' + (r.enabled ? " on" : "") + '" onclick="data.recruiterMode.enabled=!data.recruiterMode.enabled;this.classList.toggle(\'on\');onChange()"></button><span class="toggle-label">Show recruiter snapshot section</span></div>' +
+    '<div class="field"><label>Headline</label><input value="' + esc(r.headline || "") + '" oninput="data.recruiterMode.headline=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Summary</label><textarea rows="2" oninput="data.recruiterMode.summary=this.value;onChange()">' + esc(r.summary || "") + '</textarea></div>' +
+    '<div class="field"><label>Bullets</label></div>' +
+    (r.bullets || []).map(function(b, i) { return '<div class="list-item"><textarea rows="1" oninput="data.recruiterMode.bullets[' + i + ']=this.value;onChange()">' + esc(b) + '</textarea><button class="btn btn-sm btn-danger btn-ghost" onclick="data.recruiterMode.bullets.splice(' + i + ',1);onChange();render()">\u2715</button></div>'; }).join("") +
+    '<button class="btn btn-sm" onclick="data.recruiterMode.bullets.push(\'\');onChange();render()">+ Bullet</button>' +
+    '<div class="field-row" style="margin-top:12px"><div class="field"><label>CTA Label</label><input value="' + esc(r.ctaLabel || "") + '" oninput="data.recruiterMode.ctaLabel=this.value;onChange()"/></div>' +
+    '<div class="field"><label>CTA Link</label><input value="' + esc(r.ctaHref || "") + '" oninput="data.recruiterMode.ctaHref=this.value;onChange()"/></div></div></div></div>' +
+    '<div class="sec-head" style="margin-top:22px"><h2>Timeline</h2><span class="spacer"></span><button class="btn btn-primary" onclick="addTimelineItem()">+ Milestone</button></div>' +
+    data.timeline.map(function(t, i) { return renderTimelineEditor(i, t); }).join("") +
+    '<div class="sec-head" style="margin-top:22px"><h2>Testimonials</h2><span class="spacer"></span><button class="btn btn-primary" onclick="addTestimonial()">+ Quote</button></div>' +
+    data.testimonials.map(function(t, i) { return renderTestimonialEditor(i, t); }).join("");
+}
+
+function renderTimelineEditor(i, t) {
+  return '<div class="e-card" data-draggable data-idx="' + i + '" data-list="timeline"><div class="e-card-body open">' +
+    '<div class="field-row"><div class="field"><label>Date / Period</label><input value="' + esc(t.date || "") + '" oninput="data.timeline[' + i + '].date=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Title</label><input value="' + esc(t.title || "") + '" oninput="data.timeline[' + i + '].title=this.value;onChange()"/></div></div>' +
+    '<div class="field"><label>Description</label><textarea rows="2" oninput="data.timeline[' + i + '].text=this.value;onChange()">' + esc(t.text || "") + '</textarea></div>' +
+    '<button class="btn btn-sm btn-danger btn-ghost" onclick="data.timeline.splice(' + i + ',1);onChange();render()">Delete</button></div></div>';
+}
+
+function renderTestimonialEditor(i, t) {
+  return '<div class="e-card" data-draggable data-idx="' + i + '" data-list="testimonials"><div class="e-card-body open">' +
+    '<div class="field"><label>Quote</label><textarea rows="3" oninput="data.testimonials[' + i + '].quote=this.value;onChange()">' + esc(t.quote || "") + '</textarea></div>' +
+    '<div class="field-row"><div class="field"><label>Name</label><input value="' + esc(t.name || "") + '" oninput="data.testimonials[' + i + '].name=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Role / Context</label><input value="' + esc(t.role || "") + '" oninput="data.testimonials[' + i + '].role=this.value;onChange()"/></div></div>' +
+    '<button class="btn btn-sm btn-danger btn-ghost" onclick="data.testimonials.splice(' + i + ',1);onChange();render()">Delete</button></div></div>';
+}
+
+function renderPageBlockEditor(pi, bi, b) {
+  return renderContentBlockEditor("data.customPages[" + pi + "].blocks", "customPages." + pi + ".blocks", bi, b, "removePageBlock(" + pi + "," + bi + ")", "duplicatePageBlock(" + pi + "," + bi + ")");
+}
+
+// ================================================================
 //  META TAB
 // ================================================================
 function renderMeta() {
+  var pal = data.customization.palette;
+  var fonts = data.customization.fonts;
+  var vis = data.customization.sectionVisibility;
+  var ai = data.customization.aiAssistant || {};
+  var currentProfile = data.customization.currentStyleProfile || "";
   return '<div class="sec-head"><h2>Settings</h2></div>' +
     '<div class="field"><label>Full Name</label><input value="' + esc(data.name) + '" oninput="data.name=this.value;onChange()"/></div>' +
     '<div class="field"><label>Nav Brand</label><input value="' + esc(data.brand) + '" oninput="data.brand=this.value;onChange()" style="font-family:var(--mono)"/></div>' +
     '<div class="field"><label>Resume PDF Path</label><input value="' + esc(data.resume.file) + '" oninput="data.resume.file=this.value;onChange()" style="font-family:var(--mono)"/></div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Section Hierarchy</h3>' +
+    '<div class="toggle-row"><button class="toggle' + (vis.projects ? " on" : "") + '" onclick="toggleSectionVisibility(\'projects\',this)"></button><span class="toggle-label">Projects</span></div>' +
+    '<div class="toggle-row"><button class="toggle' + (vis.skills ? " on" : "") + '" onclick="toggleSectionVisibility(\'skills\',this)"></button><span class="toggle-label">Skills</span></div>' +
+    '<div class="toggle-row"><button class="toggle' + (vis.about ? " on" : "") + '" onclick="toggleSectionVisibility(\'about\',this)"></button><span class="toggle-label">About</span></div>' +
+    '<div class="toggle-row"><button class="toggle' + (vis.contact ? " on" : "") + '" onclick="toggleSectionVisibility(\'contact\',this)"></button><span class="toggle-label">Contact</span></div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">AI Assistant</h3>' +
+    '<div class="toggle-row"><button class="toggle' + (ai.enabled !== false ? " on" : "") + '" onclick="toggleAiSetting(\'enabled\',this)"></button><span class="toggle-label">Enable floating assistant on website</span></div>' +
+    '<div class="toggle-row"><button class="toggle' + (ai.startOpen ? " on" : "") + '" onclick="toggleAiSetting(\'startOpen\',this)"></button><span class="toggle-label">Start chat panel open</span></div>' +
+    '<div class="field"><label>Assistant Name</label><input value="' + esc(ai.name || "Nova") + '" oninput="data.customization.aiAssistant.name=this.value;onChange()"/></div>' +
+    '<div class="field"><label>Brain Mode</label><select onchange="data.customization.aiAssistant.mode=this.value;onChange()">' +
+    '<option value="web-llm"' + ((ai.mode || "web-llm") === "web-llm" ? " selected" : "") + '>Real Browser LLM (experimental, no install)</option>' +
+    '<option value="browser-ai"' + ((ai.mode || "web-llm") === "browser-ai" ? " selected" : "") + '>Grounded Portfolio AI (reliable)</option>' +
+    '<option value="rule"' + ((ai.mode || "web-llm") === "rule" ? " selected" : "") + '>Simple fallback</option></select>' +
+    '<div class="field-hint">Real Browser LLM thinks more naturally but needs WebGPU and downloads a model in the browser. It falls back if unsupported.</div></div>' +
+    '<div class="field"><label>Knowledge Notes (custom facts and tone)</label><textarea rows="4" oninput="data.customization.aiAssistant.knowledgeNotes=this.value;onChange()">' + esc(ai.knowledgeNotes || "") + '</textarea>' +
+    '<div class="field-hint">Add important facts, preferred tone, or FAQ snippets. Nova uses this as extra grounded context.</div></div>' +
+    '<div class="field"><label>Browser LLM Model</label><select onchange="data.customization.aiAssistant.localModel=this.value;onChange()">' +
+    '<option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC"' + ((ai.localModel || "") === "Qwen2.5-0.5B-Instruct-q4f16_1-MLC" ? " selected" : "") + '>Qwen2.5 0.5B (faster)</option>' +
+    '<option value="Llama-3.2-1B-Instruct-q4f16_1-MLC"' + ((ai.localModel || "") === "Llama-3.2-1B-Instruct-q4f16_1-MLC" ? " selected" : "") + '>Llama 3.2 1B (better, heavier)</option>' +
+    '</select><div class="field-hint">Model files are fetched by the browser and cached. Visitors do not install anything.</div></div>' +
+    '<div class="field"><label>Greeting Message</label><textarea rows="2" oninput="data.customization.aiAssistant.greeting=this.value;onChange()">' + esc(ai.greeting || "") + '</textarea></div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Style Profiles</h3>' +
+    '<div class="field"><label>Active Style Profile</label><select onchange="switchStyleProfile(this.value)">' + renderStyleProfileOptions(currentProfile) + '</select></div>' +
+    '<div class="style-grid">' + renderStyleProfileGallery() + '</div>' +
+    '<div class="preset-row">' +
+    '<button class="btn btn-sm" onclick="saveAsNewStyleProfile()">Save As New</button>' +
+    '<button class="btn btn-sm" onclick="renameCurrentStyleProfile()">Rename</button>' +
+    '<button class="btn btn-sm btn-danger" onclick="deleteCurrentStyleProfile()">Delete</button>' +
+    '<button class="btn btn-sm" onclick="exportStyleProfiles()">Export Pack</button>' +
+    '<button class="btn btn-sm" onclick="importStyleProfiles()">Import Pack</button>' +
+    '</div>' +
+    '<div class="tiny">Profiles store palette + font identity and can be reused globally or per-page.</div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Theme Palette</h3>' +
+    '<div class="preset-row">' +
+    '<button class="btn btn-sm" onclick="applyPalettePreset(\'cyber\')">Cyber</button>' +
+    '<button class="btn btn-sm" onclick="applyPalettePreset(\'obsidian\')">Obsidian</button>' +
+    '<button class="btn btn-sm" onclick="applyPalettePreset(\'ember\')">Ember</button>' +
+    '<button class="btn btn-sm" onclick="applyPalettePreset(\'mint\')">Mint</button></div>' +
+    '<div class="palette-grid">' +
+    renderColorChip("Background", "bg", pal.bg) +
+    renderColorChip("Card", "card", pal.card) +
+    renderColorChip("Section", "sec", pal.sec) +
+    renderColorChip("Border", "border", pal.border) +
+    renderColorChip("Text", "fg", pal.fg) +
+    renderColorChip("Muted", "muted", pal.muted) +
+    renderColorChip("Primary", "primary", pal.primary) +
+    renderColorChip("Accent", "accent", pal.accent) +
+    '</div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Fonts (Local-first)</h3>' +
+    '<div class="field-row">' +
+    '<div class="field"><label>Display</label><select onchange="setFontStack(\'display\',this.value)">' + renderFontOptions(fonts.display) + '</select></div>' +
+    '<div class="field"><label>Body</label><select onchange="setFontStack(\'body\',this.value)">' + renderFontOptions(fonts.body) + '</select></div>' +
+    '<div class="field"><label>Mono</label><select onchange="setFontStack(\'mono\',this.value)">' + renderFontOptions(fonts.mono) + '</select></div>' +
+    '</div><div class="tiny">These use local/system stacks first. No required web font download.</div>' +
+    '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
+    '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Portfolio Blueprints</h3>' +
+    '<div class="field-hint" style="margin-bottom:8px">Like creating a new level in a game engine: starts a fresh content style and structure preset.</div>' +
+    '<div class="preset-row">' +
+    '<button class="btn btn-sm" onclick="applyPortfolioBlueprint(\'game-dev\')">Game Dev</button>' +
+    '<button class="btn btn-sm" onclick="applyPortfolioBlueprint(\'minimal\')">Minimal</button>' +
+    '<button class="btn btn-sm" onclick="applyPortfolioBlueprint(\'studio\')">Studio</button></div>' +
+    '<div class="tiny" style="margin-bottom:10px">This overwrites hero/about/contact/skills/custom pages and style tokens, but keeps your projects.</div>' +
     '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>' +
     '<h3 style="font-size:13px;font-weight:700;margin-bottom:12px">Danger Zone</h3>' +
     '<button class="btn btn-danger" onclick="if(confirm(\'Clear draft from localStorage?\')){localStorage.removeItem(\'portfolio-draft\');markClean();toast(\'Draft cleared\')}">Clear Draft</button>' +
@@ -1024,7 +1922,382 @@ function addSection(pi, layout) { ensureDetail(pi); data.projects[pi].detail.sec
 function addColumn(pi, si) { data.projects[pi].detail.sections[si].columns.push({title:"",text:""}); render(); }
 function switchColText(pi, si, ci) { var c = data.projects[pi].detail.sections[si].columns[ci]; delete c.items; c.text = c.text||""; onChange(); render(); }
 function switchColList(pi, si, ci) { var c = data.projects[pi].detail.sections[si].columns[ci]; delete c.text; c.items = c.items||[""]; onChange(); render(); }
-function addSkillCat() { data.skills.push({category:"New Category",items:[{name:"New Skill",pct:50}]}); onChange(); render(); toast("Category added"); }
+function setSkillScore(ci, si, raw) {
+  var n = Math.max(0, Math.min(5, Math.round((+raw || 0) * 2) / 2));
+  data.skills[ci].items[si].score = n;
+  onChange();
+  render();
+}
+function addSkillCat() { data.skills.push({category:"New Category",items:[{name:"New Skill",score:3}]}); onChange(); render(); toast("Category added"); }
+function addTimelineItem() { data.timeline.push({date:"",title:"New Milestone",text:""}); onChange(); render(); }
+function addTestimonial() { data.testimonials.push({quote:"",name:"",role:""}); onChange(); render(); }
+function sanitizeSlug(v) { return String(v || "").toLowerCase().trim().replace(/[^a-z0-9\- ]/g, "").replace(/\s+/g, "-").replace(/\-+/g, "-"); }
+function addCustomPage() {
+  var slug = "new-page-" + Date.now().toString().slice(-4);
+  data.customPages.push({ id: slug, title: "New Custom Page", navLabel: "New Page", layout:"stack", visible:true, theme:{inherit:true,primary:"",accent:"",card:""}, content: "Write your story here.", blocks:[{type:"text",title:"Overview",body:"Write your story here."}] });
+  activeCustomPageIndex = data.customPages.length - 1;
+  openCards.add("customPages-" + activeCustomPageIndex);
+  onChange(); render(); toast("Custom page added");
+}
+function duplicateCustomPage(i) {
+  var c = JSON.parse(JSON.stringify(data.customPages[i]));
+  c.id = sanitizeSlug(c.id + "-copy");
+  c.title = (c.title || "Custom Page") + " (copy)";
+  data.customPages.splice(i + 1, 0, c);
+  onChange(); render(); toast("Custom page duplicated");
+}
+function applyPalettePreset(name) {
+  data.customization.palette = JSON.parse(JSON.stringify(PALETTE_PRESETS[name] || PALETTE_PRESETS.cyber));
+  persistCustomizationIntoProfile();
+  onChange(); render();
+}
+function setPaletteColor(key, val) {
+  data.customization.palette[key] = val;
+  persistCustomizationIntoProfile();
+  onChange();
+}
+function renderColorChip(label, key, value) {
+  return '<div class="color-chip"><input type="color" value="' + esc(value) + '" oninput="setPaletteColor(\'' + key + '\',this.value)"/>' +
+    '<div><div style="font-size:12px">' + label + '</div><div class="tiny">' + esc(value) + '</div></div></div>';
+}
+function renderFontOptions(selected) {
+  return Object.keys(FONT_STACKS).map(function(name) {
+    var stack = FONT_STACKS[name];
+    return '<option value="' + esc(stack) + '"' + (stack === selected ? " selected" : "") + '>' + esc(name) + '</option>';
+  }).join("");
+}
+function setFontStack(type, stack) {
+  data.customization.fonts[type] = stack;
+  persistCustomizationIntoProfile();
+  onChange(); render();
+}
+function renderStyleProfileOptions(selectedId) {
+  return (data.customization.styleProfiles || []).map(function(sp) {
+    return '<option value="' + esc(sp.id) + '"' + (sp.id === selectedId ? " selected" : "") + '>' + esc(sp.name) + '</option>';
+  }).join("");
+}
+function renderStyleProfileGallery() {
+  return (data.customization.styleProfiles || []).map(function(sp) {
+    var p = sp.palette || {};
+    var isActive = sp.id === data.customization.currentStyleProfile;
+    return '<div class="style-card' + (isActive ? " active" : "") + '">' +
+      '<div class="style-preview" style="--bg:' + esc(p.bg || "#111") + ';--card:' + esc(p.card || "#1a1a1a") + ';--border:' + esc(p.border || "#2a2a2a") + ';--primary:' + esc(p.primary || "#2dd4bf") + ';--muted:' + esc(p.muted || "#8f9ab8") + '">' +
+      '<div class="style-swatch-row">' +
+      '<div class="style-swatch" style="background:' + esc(p.bg || "#111") + '"></div>' +
+      '<div class="style-swatch" style="background:' + esc(p.card || "#222") + '"></div>' +
+      '<div class="style-swatch" style="background:' + esc(p.primary || "#2dd4bf") + '"></div>' +
+      '<div class="style-swatch" style="background:' + esc(p.accent || "#a78bfa") + '"></div>' +
+      '</div>' +
+      '<div class="style-mini"><div class="style-mini-title" style="color:var(--primary)">PROFILE</div>' +
+      '<div class="style-mini-line"></div><div class="style-mini-line"></div></div></div>' +
+      '<div class="style-meta"><div class="style-meta-head"><span class="style-name">' + esc(sp.name) + '</span><span class="tiny">' + (isActive ? "ACTIVE" : "") + '</span></div>' +
+      '<div class="preset-row" style="margin-bottom:0">' +
+      '<button class="btn btn-sm btn-ghost" onclick="switchStyleProfile(\'' + esc(sp.id) + '\')">Use</button>' +
+      '<button class="btn btn-sm btn-ghost" onclick="duplicateStyleProfile(\'' + esc(sp.id) + '\')">Duplicate</button>' +
+      '</div></div></div>';
+  }).join("");
+}
+function switchStyleProfile(id) {
+  data.customization.currentStyleProfile = id;
+  syncCustomizationFromProfile(true);
+  render();
+}
+function saveAsNewStyleProfile() {
+  var name = prompt("Style profile name:", "New Style");
+  if (!name) return;
+  var id = sanitizeSlug(name) || ("style-" + Date.now());
+  data.customization.styleProfiles.push({
+    id: id + "-" + Date.now().toString().slice(-4),
+    name: name,
+    palette: JSON.parse(JSON.stringify(data.customization.palette)),
+    fonts: JSON.parse(JSON.stringify(data.customization.fonts))
+  });
+  data.customization.currentStyleProfile = data.customization.styleProfiles[data.customization.styleProfiles.length - 1].id;
+  onChange(); render(); toast("Style profile created");
+}
+function renameCurrentStyleProfile() {
+  var p = getCurrentStyleProfile();
+  if (!p) return;
+  var name = prompt("Rename style profile:", p.name);
+  if (!name) return;
+  p.name = name;
+  onChange(); render();
+}
+function deleteCurrentStyleProfile() {
+  if ((data.customization.styleProfiles || []).length <= 1) { toast("Keep at least one style profile", "error"); return; }
+  var id = data.customization.currentStyleProfile;
+  data.customization.styleProfiles = data.customization.styleProfiles.filter(function(sp) { return sp.id !== id; });
+  data.customization.currentStyleProfile = data.customization.styleProfiles[0].id;
+  syncCustomizationFromProfile(false);
+  onChange(); render();
+}
+function duplicateStyleProfile(id) {
+  var src = (data.customization.styleProfiles || []).find(function(sp) { return sp.id === id; });
+  if (!src) return;
+  var cloneId = sanitizeSlug(src.name) + "-" + Date.now().toString().slice(-4);
+  data.customization.styleProfiles.push({
+    id: cloneId,
+    name: src.name + " Copy",
+    palette: JSON.parse(JSON.stringify(src.palette || {})),
+    fonts: JSON.parse(JSON.stringify(src.fonts || {}))
+  });
+  data.customization.currentStyleProfile = cloneId;
+  syncCustomizationFromProfile(false);
+  onChange(); render(); toast("Style duplicated");
+}
+function exportStyleProfiles() {
+  var pack = {
+    exportedAt: new Date().toISOString(),
+    profiles: JSON.parse(JSON.stringify(data.customization.styleProfiles || []))
+  };
+  var blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "style-pack.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Style pack exported");
+}
+function importStyleProfiles() {
+  var input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function() {
+      try {
+        var obj = JSON.parse(reader.result);
+        var incoming = Array.isArray(obj.profiles) ? obj.profiles : [];
+        if (!incoming.length) { toast("No profiles found", "error"); return; }
+        incoming.forEach(function(sp) {
+          data.customization.styleProfiles.push({
+            id: sanitizeSlug(sp.id || sp.name || ("style-" + Date.now())) + "-" + Math.floor(Math.random() * 1000),
+            name: sp.name || "Imported Style",
+            palette: sp.palette || JSON.parse(JSON.stringify(PALETTE_PRESETS.cyber)),
+            fonts: sp.fonts || { display: FONT_STACKS.display, body: FONT_STACKS.system, mono: FONT_STACKS.mono }
+          });
+        });
+        data.customization.currentStyleProfile = data.customization.styleProfiles[data.customization.styleProfiles.length - 1].id;
+        syncCustomizationFromProfile(false);
+        onChange(); render(); toast("Style pack imported");
+      } catch (e) {
+        toast("Import failed: " + e.message, "error");
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function createPageBlock(type) { return normalizePageBlock({ type: type }); }
+function addPageBlock(pi, type) {
+  data.customPages[pi].blocks = data.customPages[pi].blocks || [];
+  data.customPages[pi].blocks.push(createPageBlock(type));
+  onChange(); render();
+}
+function removePageBlock(pi, bi) {
+  data.customPages[pi].blocks.splice(bi, 1);
+  onChange(); render();
+}
+function duplicatePageBlock(pi, bi) {
+  var copy = JSON.parse(JSON.stringify(data.customPages[pi].blocks[bi]));
+  data.customPages[pi].blocks.splice(bi + 1, 0, copy);
+  onChange(); render();
+}
+function applyPortfolioBlueprint(kind) {
+  if (!confirm("Apply blueprint? This replaces hero/about/contact/skills/custom pages but keeps projects.")) return;
+  var b = PORTFOLIO_BLUEPRINTS[kind] || PORTFOLIO_BLUEPRINTS["game-dev"];
+  data.hero = JSON.parse(JSON.stringify(b.hero));
+  data.about = JSON.parse(JSON.stringify(b.about));
+  data.contact = JSON.parse(JSON.stringify(b.contact));
+  data.skills = JSON.parse(JSON.stringify(b.skills));
+  data.customPages = JSON.parse(JSON.stringify(b.customPages));
+  data.customization.palette = JSON.parse(JSON.stringify(b.palette));
+  data.customization.fonts = JSON.parse(JSON.stringify(b.fonts));
+  data.customization.sectionVisibility = { projects:true, skills:true, about:true, contact:true };
+  persistCustomizationIntoProfile();
+  onChange(); render(); toast("Blueprint applied");
+}
+
+var PORTFOLIO_BLUEPRINTS = {
+  "game-dev": {
+    hero: { label: "// GAMEPLAY ENGINEER", roles:["Gameplay Systems","AI Programmer","Rapid Prototyping"], bio:"I build systemic gameplay loops and responsive combat AI with production-ready code quality." },
+    about: {
+      bio:["I focus on systems that are easy to iterate and fun to tune.","My workflow is prototype fast, profile early, polish where it matters."],
+      highlights:["Gameplay architecture","AI behaviors & combat loops","Cross-discipline collaboration"],
+      education:[{ degree:"Your Degree", school:"Your School", years:"20XX - Present", detail:"Specialization details..." }]
+    },
+    contact: { headline:"LET'S BUILD SOMETHING FUN", sub:"Open to gameplay, AI, and tools programming roles.", links:[{label:"Email",handle:"you@example.com",href:"mailto:you@example.com",icon:"mail"}] },
+    skills: [{category:"Engines",items:[{name:"Unity",score:4.5},{name:"Unreal",score:4}]},{category:"Code",items:[{name:"C++",score:4},{name:"C#",score:4.5}]},{category:"AI",items:[{name:"Behavior Trees",score:4.5},{name:"Utility AI",score:4}]}],
+    customPages: [{id:"systems-lab",title:"Systems Lab",navLabel:"Systems Lab",layout:"grid",visible:true,theme:{inherit:true,primary:"",accent:"",card:""},blocks:[{type:"text",title:"How I Work",body:"I design core loops first, then scale them with data-driven architecture."},{type:"stats",title:"Quick Metrics",items:[{label:"Shipped Projects",value:"6+"},{label:"Team Size",value:"2-8"}]}]}],
+    palette: PALETTE_PRESETS.cyber,
+    fonts: { display: FONT_STACKS.display, body: FONT_STACKS.system, mono: FONT_STACKS.mono }
+  },
+  "minimal": {
+    hero: { label: "// SOFTWARE DEVELOPER", roles:["Full-Stack Builder","Problem Solver","Clean Architecture"], bio:"I create thoughtful digital products with clear UX and robust implementation." },
+    about: {
+      bio:["I enjoy simplifying complexity and delivering maintainable solutions.","My focus is reliability, readability, and fast iteration."],
+      highlights:["Product thinking","Clean code","Pragmatic execution"],
+      education:[{ degree:"Your Degree", school:"Your School", years:"20XX - Present", detail:"Specialization details..." }]
+    },
+    contact: { headline:"OPEN TO NEW OPPORTUNITIES", sub:"Let’s talk about your product or team needs.", links:[{label:"Email",handle:"you@example.com",href:"mailto:you@example.com",icon:"mail"}] },
+    skills: [{category:"Core",items:[{name:"JavaScript",score:4.5},{name:"TypeScript",score:4.5},{name:"Testing",score:4}]},{category:"Delivery",items:[{name:"Architecture",score:4},{name:"Collaboration",score:4.5}]}],
+    customPages: [{id:"approach",title:"Approach",navLabel:"Approach",layout:"stack",visible:true,theme:{inherit:true,primary:"",accent:"",card:""},blocks:[{type:"text",title:"Principles",body:"Simple systems, measurable outcomes, and continuous improvement."},{type:"cta",title:"Work Together",body:"Need someone who can ship and communicate clearly?",label:"Contact",href:"#contact"}]}],
+    palette: PALETTE_PRESETS.obsidian,
+    fonts: { display: FONT_STACKS.humanist, body: FONT_STACKS.system, mono: FONT_STACKS.mono }
+  },
+  "studio": {
+    hero: { label: "// CREATIVE TECHNOLOGIST", roles:["Interactive Experiences","Realtime Graphics","Design Systems"], bio:"I blend creative direction with technical execution to build memorable interactive work." },
+    about: {
+      bio:["I love projects where visuals and systems elevate each other.","From tooling to final polish, I stay involved end to end."],
+      highlights:["Creative coding","Realtime visuals","Team workflows"],
+      education:[{ degree:"Your Degree", school:"Your School", years:"20XX - Present", detail:"Specialization details..." }]
+    },
+    contact: { headline:"LET'S CREATE", sub:"Available for creative tech collaborations and production work.", links:[{label:"Email",handle:"you@example.com",href:"mailto:you@example.com",icon:"mail"}] },
+    skills: [{category:"Creative Stack",items:[{name:"Shaders",score:4},{name:"3D Pipelines",score:4},{name:"Interaction",score:4.5}]},{category:"Production",items:[{name:"Tooling",score:4},{name:"Direction",score:4.5}]}],
+    customPages: [{id:"showcase",title:"Showcase",navLabel:"Showcase",layout:"grid",visible:true,theme:{inherit:true,primary:"",accent:"",card:""},blocks:[{type:"bullet",title:"Capabilities",items:["Interactive installations","Realtime rendering pipelines","Playable prototypes"]},{type:"cta",title:"Need a Creative Tech Partner?",body:"I can jump from concept to polished build quickly.",label:"Start a Conversation",href:"#contact"}]}],
+    palette: PALETTE_PRESETS.ember,
+    fonts: { display: FONT_STACKS.display, body: FONT_STACKS.modern, mono: FONT_STACKS.jet }
+  }
+};
+
+function renderPageThemeChip(pi, key, label, value) {
+  return '<div class="color-chip"><input type="color" value="' + esc(value || "#2dd4bf") + '" oninput="setPageThemeColor(' + pi + ',\'' + key + '\',this.value)"/>' +
+    '<div><div style="font-size:12px">' + label + '</div><div class="tiny">' + esc(value || "auto") + '</div></div></div>';
+}
+function setPageThemeColor(pi, key, val) {
+  data.customPages[pi].theme = data.customPages[pi].theme || { inherit: true, primary: "", accent: "", card: "" };
+  data.customPages[pi].theme[key] = val;
+  data.customPages[pi].theme.inherit = false;
+  onChange(); render();
+}
+function togglePageThemeInherit(pi, btn) {
+  data.customPages[pi].theme = data.customPages[pi].theme || { inherit: true, primary: "", accent: "", card: "" };
+  data.customPages[pi].theme.inherit = !(data.customPages[pi].theme.inherit !== false);
+  btn.classList.toggle("on", data.customPages[pi].theme.inherit !== false);
+  onChange(); render();
+}
+function toggleSectionVisibility(key, btn) {
+  data.customization.sectionVisibility[key] = !data.customization.sectionVisibility[key];
+  btn.classList.toggle("on", data.customization.sectionVisibility[key]);
+  onChange();
+}
+function toggleAiSetting(key, btn) {
+  data.customization.aiAssistant[key] = !data.customization.aiAssistant[key];
+  btn.classList.toggle("on", !!data.customization.aiAssistant[key]);
+  onChange();
+}
+function savePageTemplate(pi) {
+  var name = prompt("Prefab name:", data.customPages[pi].title + " Template");
+  if (!name) return;
+  data.customization.pageTemplates.push({
+    name: name,
+    layout: data.customPages[pi].layout,
+    blocks: JSON.parse(JSON.stringify(data.customPages[pi].blocks || []))
+  });
+  onChange(); render(); toast("Prefab saved");
+}
+function renderTemplateLibrary(pi) {
+  var t = data.customization.pageTemplates || [];
+  if (!t.length) return '<div class="field-hint">No saved prefabs yet.</div>';
+  return '<div class="field"><label>Saved Prefabs</label>' + t.map(function(tp, ti) {
+    return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"><span class="tiny" style="flex:1">' + esc(tp.name) + '</span>' +
+      '<button class="btn btn-sm btn-ghost" onclick="applyPageTemplate(' + pi + ',' + ti + ')">Apply</button>' +
+      '<button class="btn btn-sm btn-danger btn-ghost" onclick="deletePageTemplate(' + ti + ')">Delete</button></div>';
+  }).join("") + '</div>';
+}
+function applyPageTemplate(pi, ti) {
+  var tp = data.customization.pageTemplates[ti];
+  if (!tp) return;
+  data.customPages[pi].layout = tp.layout || "stack";
+  data.customPages[pi].blocks = JSON.parse(JSON.stringify(tp.blocks || []));
+  onChange(); render(); toast("Prefab applied");
+}
+function deletePageTemplate(ti) {
+  data.customization.pageTemplates.splice(ti, 1);
+  onChange(); render();
+}
+function setPreviewViewport(mode) {
+  var frame = document.getElementById("preview-frame");
+  var frameB = document.getElementById("preview-frame-b");
+  frame.classList.remove("viewport-desktop", "viewport-tablet", "viewport-mobile");
+  frame.classList.add("viewport-" + mode);
+  if (frameB) {
+    frameB.classList.remove("viewport-desktop", "viewport-tablet", "viewport-mobile");
+    frameB.classList.add("viewport-" + mode);
+  }
+}
+function togglePreviewCompare() {
+  previewCompare = !previewCompare;
+  if (!previewCompare) selectedDeltaToken = "";
+  document.getElementById("preview-col-b").style.display = previewCompare ? "" : "none";
+  document.getElementById("preview-style-b").style.display = previewCompare ? "" : "none";
+  document.getElementById("compare-diff").style.display = previewCompare ? "" : "none";
+  document.getElementById("preview-shell").classList.toggle("compare", previewCompare);
+  document.getElementById("btn-preview-compare").classList.toggle("active", previewCompare);
+  refreshPreview();
+}
+function togglePreviewFocus() {
+  var app = document.getElementById("app");
+  var isFocus = app.classList.toggle("preview-focus");
+  document.getElementById("btn-preview-focus").classList.toggle("active", isFocus);
+  if (previewVisible) refreshPreview();
+}
+function populatePreviewStyleSelectors() {
+  var styles = data.customization.styleProfiles || [];
+  var a = document.getElementById("preview-style-a");
+  var b = document.getElementById("preview-style-b");
+  var prevA = a ? a.value : "";
+  var prevB = b ? b.value : "";
+  var opts = ['<option value="">Active</option>'].concat(styles.map(function(sp) {
+    return '<option value="' + esc(sp.id) + '">' + esc(sp.name) + '</option>';
+  })).join("");
+  a.innerHTML = opts;
+  b.innerHTML = opts;
+  if (styles.some(function(sp){return sp.id===prevA;}) || prevA==="") a.value = prevA;
+  if (styles.some(function(sp){return sp.id===prevB;}) || prevB==="") b.value = prevB;
+  updateCompareDiffBadge();
+}
+function getStyleForPreview(profileId) {
+  var styles = data.customization.styleProfiles || [];
+  var active = getCurrentStyleProfile();
+  var picked = profileId ? styles.find(function(sp) { return sp.id === profileId; }) : active;
+  return picked || active;
+}
+function updateCompareDiffBadge() {
+  var badge = document.getElementById("compare-diff");
+  if (!badge) return;
+  if (!previewCompare) { badge.style.display = "none"; return; }
+  badge.style.display = "";
+  var styleAId = (document.getElementById("preview-style-a") || {}).value || "";
+  var styleBId = (document.getElementById("preview-style-b") || {}).value || "";
+  var styleA = getStyleForPreview(styleAId);
+  var styleB = getStyleForPreview(styleBId);
+  if (!styleA || !styleB) { badge.innerHTML = ""; return; }
+  var paletteKeys = ["bg","card","sec","border","fg","muted","primary","accent"];
+  var fontKeys = ["display","body","mono"];
+  var changed = [];
+  paletteKeys.forEach(function(k) {
+    if ((styleA.palette || {})[k] !== (styleB.palette || {})[k]) changed.push(k);
+  });
+  fontKeys.forEach(function(k) {
+    if ((styleA.fonts || {})[k] !== (styleB.fonts || {})[k]) changed.push("font-" + k);
+  });
+  if (!changed.length) {
+    badge.innerHTML = "<strong>No style deltas</strong>";
+    return;
+  }
+  var chips = changed.map(function(token) {
+    var active = token === selectedDeltaToken ? " active" : "";
+    return '<button class="diff-chip' + active + '" onclick="setCompareDeltaToken(\'' + esc(token) + '\')">' + esc(token) + '</button>';
+  }).join("");
+  badge.innerHTML = "<strong>" + changed.length + " delta" + (changed.length > 1 ? "s" : "") + ":</strong>" + chips;
+}
+function setCompareDeltaToken(token) {
+  selectedDeltaToken = selectedDeltaToken === token ? "" : token;
+  refreshPreview();
+}
 
 function toggleCard(head) {
   var body = head.nextElementSibling;
@@ -1090,8 +2363,11 @@ function insertSymbol(sym) {
 function refreshPreview() {
   if (!previewVisible) return;
   var frame = document.getElementById("preview-frame");
+  var frameB = document.getElementById("preview-frame-b");
   var pageSel = document.getElementById("preview-page");
   var projSel = document.getElementById("preview-project");
+  var styleA = document.getElementById("preview-style-a");
+  var styleB = document.getElementById("preview-style-b");
   var url = pageSel.value;
 
   if (url.indexOf("project.html") >= 0) {
@@ -1107,13 +2383,26 @@ function refreshPreview() {
   document.getElementById("preview-url").textContent = url;
   localStorage.setItem("portfolio-draft", JSON.stringify(data));
 
-  var scrollY = 0;
-  try { scrollY = frame.contentWindow ? frame.contentWindow.scrollY : 0; } catch(e) {}
-  frame.onload = function() {
-    try { frame.contentWindow.scrollTo(0, scrollY); } catch(e) {}
-    frame.onload = null;
-  };
-  frame.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "_t=" + Date.now();
+  function withStyle(u, styleId) {
+    if (!styleId) return u;
+    return u + "&styleProfile=" + encodeURIComponent(styleId);
+  }
+  function effectiveStyleId(id) {
+    if (id) return id;
+    var current = getCurrentStyleProfile();
+    return current ? current.id : "";
+  }
+  var baseA = withStyle(url, styleA ? styleA.value : "");
+  frame.src = baseA + "&_t=" + Date.now();
+  if (previewCompare && frameB) {
+    var baseB = withStyle(url, styleB ? styleB.value : "");
+    var aId = effectiveStyleId(styleA ? styleA.value : "");
+    if (selectedDeltaToken) {
+      baseB += "&compareBase=" + encodeURIComponent(aId) + "&isolateToken=" + encodeURIComponent(selectedDeltaToken);
+    }
+    frameB.src = baseB + "&_t=" + Date.now();
+  }
+  updateCompareDiffBadge();
 }
 
 function previewProject(id) {
@@ -1147,7 +2436,7 @@ splitHandle.addEventListener("mousedown", function(e) {
   var startX = e.clientX;
   var startW = preview.offsetWidth;
   splitHandle.classList.add("dragging");
-  function onMove(ev) { preview.style.width = Math.max(200, startW + (startX - ev.clientX)) + "px"; }
+  function onMove(ev) { preview.style.width = Math.max(320, startW + (startX - ev.clientX)) + "px"; }
   function onUp() { splitHandle.classList.remove("dragging"); document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); }
   document.addEventListener("mousemove", onMove);
   document.addEventListener("mouseup", onUp);
@@ -1220,6 +2509,7 @@ function importFile() {
         var text = reader.result;
         var fn = new Function(text + "; return SITE;");
         data = JSON.parse(JSON.stringify(fn()));
+        normalizeDataModel();
         history = [JSON.stringify(data)];
         historyIdx = 0;
         updateUndoRedo();
@@ -1256,9 +2546,11 @@ var savedDraft = localStorage.getItem("portfolio-draft");
 if (savedDraft) {
   try {
     data = JSON.parse(savedDraft);
+    normalizeDataModel();
     history = [JSON.stringify(data)];
   } catch(e) {}
 }
+normalizeDataModel();
 
 render();
 refreshPreview();
